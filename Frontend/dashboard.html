@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - MyLMS</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+  <aside class="sidebar">
+    <h2>MyLMS</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="courses.html">Courses</a>
+    <a href="assignments.html">Assignments</a>
+        <a href="attendance.html">Attendance</a>
+    <a href="index.html">Logout</a>
+</aside>
+
+
+<div class="content-area">
+
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+          <div class="left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h3>Dashboard</h3>
+    </div>
+
+        <div class="right">
+            <button class="notification-btn">🔔</button>
+            <a href="profile.html" class="profile-btn">David Uche</a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <h1>Welcome, David 👋</h1>
+
+        <div class="card-grid">
+
+            <div class="course-card">
+                <h3>Web Development</h3>
+                <p>Instructor: Mr John</p>
+                <p>Progress: 60%</p>
+            </div>
+
+            <div class="course-card">
+                <h3>UI/UX Design</h3>
+                <p>Instructor: Mrs Sarah</p>
+                <p>Progress: 30%</p>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+
+</div>
+
+
+<script>
+function toggleSidebar() {
+    document.querySelector(".sidebar").classList.toggle("active");
+}
+</script>
+
+</body>
+</html>
