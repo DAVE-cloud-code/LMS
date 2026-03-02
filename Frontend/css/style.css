@@ -90,7 +90,9 @@ form button:hover {
 }
 
 /* ===== RESPONSIVE STYLES ===== */
-@media (max-width: 500px) {
+
+
+@media (max-width: 726px) {
     .auth-card {
         width: 100%;       /* use full width */
         padding: 25px;     /* reduce padding for small screens */
