@@ -273,32 +273,27 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.05);
     max-width: 500px;
 }
+/* ===================== */
+/* RESPONSIVE STYLES     */
+/* ===================== */
 
-/* ========================= */
-/* RESPONSIVE DESIGN */
-/* ========================= */
-/* ============================= */
-/* MOBILE SIDEBAR */
-/* ============================= */
+/* TABLET AND BELOW */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 30px;
+    }
 
+    .card-grid, .assignment-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+/* SMALL TABLETS AND LARGE PHONES */
 @media (max-width: 768px) {
-
     .dashboard {
         flex-direction: column;
     }
 
-    /* Show hamburger */
-    .hamburger {
-        display: block;
-        margin-right: 10px;
-    }
-
-    .top-navbar .left {
-        display: flex;
-        align-items: center;
-    }
-
-    /* Hide sidebar off screen */
     .sidebar {
         position: fixed;
         top: 0;
@@ -308,20 +303,17 @@ body {
         z-index: 1000;
     }
 
-    /* When active */
     .sidebar.active {
         left: 0;
     }
 
-    /* Content full width */
-    .content-area {
-        width: 100%;
+    .hamburger {
+        display: block;
+        font-size: 22px;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
-
-}
-
-
-@media (max-width: 768px) {
 
     .top-navbar {
         flex-direction: column;
@@ -338,37 +330,91 @@ body {
         padding: 6px 10px;
         font-size: 12px;
     }
-}
-
-@media (max-width: 768px) {
 
     .main-content {
         padding: 20px;
     }
 
-    .card-grid,
-    .assignment-grid {
+    .card-grid, .assignment-grid {
         grid-template-columns: 1fr;
     }
 }
 
+/* SMALL PHONES */
 @media (max-width: 480px) {
-
     .auth-card {
         width: 90%;
-        padding: 25px;
-    }
-
-    .profile-card {
-        width: 100%;
-    }
-
-    .assignment-details {
         padding: 20px;
     }
 
-    .submit-btn {
+    .profile-card, .assignment-details {
         width: 100%;
+        padding: 15px;
+    }
+
+    .submit-btn, .btn-green, .btn-outline, .enroll-btn, .view-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .top-navbar {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .sidebar {
+        width: 200px;
+        padding: 20px;
+    }
+
+    .sidebar h2 {
+        font-size: 1.2rem;
+    }
+
+    .sidebar a {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    .hamburger {
+        font-size: 20px;
+    }
+
+    .card-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .card-actions a {
+        width: 100%;
+        text-align: center;
     }
 }
 
+/* EXTRA SMALL PHONES */
+@media (max-width: 360px) {
+    .top-navbar .right {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .profile-btn {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+
+    .sidebar {
+        width: 180px;
+        padding: 15px;
+    }
+
+    .sidebar a {
+        font-size: 13px;
+        padding: 5px;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+}
