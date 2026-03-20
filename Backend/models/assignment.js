@@ -1,18 +1,12 @@
 const mongoose = require("mongoose");
 
-const lessonSchema = new mongoose.Schema(
-{
+const assignmentSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
-    trim: true
+    required: true
   },
 
   description: {
-    type: String
-  },
-
-  pdfUrl: {
     type: String,
     required: true
   },
@@ -23,14 +17,15 @@ const lessonSchema = new mongoose.Schema(
     required: true
   },
 
-  createdBy: {
+  instructor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
+    ref: "User"
+  },
+
+  dueDate: {
+    type: Date
   }
 
-},
-{ timestamps: true }
-);
+}, { timestamps: true });
 
-module.exports = mongoose.model("Lesson", lessonSchema);
+module.exports = mongoose.model("Assignment", assignmentSchema);

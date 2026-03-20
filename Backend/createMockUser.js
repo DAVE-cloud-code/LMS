@@ -1,29 +1,39 @@
-require("dotenv").config();
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+require("dotenv").config();
+
 const User = require("./models/user");
 
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.log("MongoDB Connection Error:", err));
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
 
-// Create a mock user
-async function createUser() {
+const createAdmin = async () => {
+
   try {
-    const mockUser = new User({
-      name: "John Do",
-      email: "johndo@example.com",
-      password: "123456", // in real app, hash this
-      role: "student",
+
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+
+    const admin = new User({
+      fullname: "Super Admin",
+      email: "admin@lms.com",
+      password: hashedPassword,
+      role: "admin"
     });
 
-    const savedUser = await mockUser.save();
-    console.log("Mock user created:", savedUser);
-    mongoose.connection.close();
-  } catch (error) {
-    console.log("Error creating mock user:", error);
-  }
-}
+    await admin.save();
 
-createUser();
+    console.log("Admin created successfully");
+
+    process.exit();
+
+  } catch (error) {
+
+    console.log(error);
+    process.exit();
+
+  }
+
+};
+
+createAdmin();
