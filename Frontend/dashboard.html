@@ -36,21 +36,27 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
 <h1 id="welcomeText">Welcome 👋</h1>
-        <div class="card-grid">
+       <div class="card-grid">
 
-            <div class="course-card">
-                <h3>Web Development</h3>
-                <p>Instructor: Mr John</p>
-                <p>Progress: 60%</p>
-            </div>
+    <div class="course-card">
+        <h3>Total Courses</h3>
+        <p id="totalCourses">0</p>
+    </div>
 
-            <div class="course-card">
-                <h3>UI/UX Design</h3>
-                <p>Instructor: Mrs Sarah</p>
-                <p>Progress: 30%</p>
-            </div>
+    <div class="course-card">
+        <h3>Pending Assignments</h3>
+        <p id="pendingAssignments">0</p>
+    </div>
 
-        </div>
+    <div class="course-card">
+        <h3>Completed</h3>
+        <p id="completedAssignments">0</p>
+    </div>
+
+</div>
+
+<h2 style="margin-top: 30px;">Your Courses</h2>
+<div id="coursesContainer"></div>
     </main>
 
 </div>
@@ -88,6 +94,44 @@ function logout() {
     localStorage.removeItem("user");
     window.location.href = "login.html";
 }
+
+async function loadDashboard() {
+    try {
+        const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const courses = await res.json();
+
+        // Update total courses
+        document.getElementById("totalCourses").textContent = courses.length;
+
+        const container = document.getElementById("coursesContainer");
+        container.innerHTML = "";
+
+        courses.forEach(course => {
+            const div = document.createElement("div");
+            div.classList.add("course-card");
+
+            div.innerHTML = `
+                <h3>${course.title}</h3>
+                <p>Instructor: ${course.instructor || "N/A"}</p>
+            `;
+
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error("Error loading dashboard:", error);
+    }
+}
+
+loadDashboard();
+
+
+
 </script>
 
 </body>
