@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+        <h2>Instructor Panel</h2>
+        <a href="#">Dashboard</a>
+        <a href="#">My Courses</a>
+        <a href="#">Create Course</a>
+        <a href="#">Assignments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </aside>
+
+    <main class="main-content">
+        <h1 id="welcomeText">Welcome 👋</h1>
+
+        <div class="card-grid" id="courseContainer"></div>
+
+        <hr>
+
+        <h2>Create Course</h2>
+
+        <form id="courseForm">
+            <input type="text" id="title" placeholder="Course Title" required>
+            <input type="text" id="category" placeholder="Category" required>
+            <textarea id="description" placeholder="Description"></textarea>
+            <button type="submit">Create Course</button>
+            <p id="msg"></p>
+        </form>
+
+    </main>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+document.getElementById("welcomeText").textContent =
+    `Welcome, ${user.fullname}`;
+
+const container = document.getElementById("courseContainer");
+
+// 🔹 Load instructor courses
+async function loadCourses() {
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const courses = await res.json();
+
+    const myCourses = courses.filter(c => c.instructor === user._id);
+
+    container.innerHTML = "";
+
+    myCourses.forEach(course => {
+        const card = document.createElement("div");
+        card.className = "course-card";
+
+        card.innerHTML = `
+            <h3>${course.title}</h3>
+            <p>${course.category}</p>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+loadCourses();
+
+// 🔹 Create course
+document.getElementById("courseForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const msg = document.getElementById("msg");
+
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses/create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            title: title.value,
+            description: description.value,
+            category: category.value
+        })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        msg.style.color = "green";
+        msg.textContent = "Course created!";
+        loadCourses();
+    } else {
+        msg.style.color = "red";
+        msg.textContent = data.message;
+    }
+});
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

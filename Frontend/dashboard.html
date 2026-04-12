@@ -111,21 +111,28 @@ async function loadDashboard() {
         const container = document.getElementById("coursesContainer");
         container.innerHTML = "";
 
-        courses.forEach(course => {
-            const div = document.createElement("div");
-            div.classList.add("course-card");
+       
+       const user = JSON.parse(localStorage.getItem("user"));
 
-            div.innerHTML =`
-                <img src="${course.thumbnail || '/images/default.jpg'}" class="course-img"/>
-                <h3>${course.title}</h3>
-                <p>${course.description}</p>
-                <button id="btn-${course._id}" onclick="enrollCourse('${course._id}')">
-                    Enroll
-                </button>
-            `;
+courses.forEach(course => {
 
-            container.appendChild(div);
-        });
+    const isEnrolled = course.students?.includes(user._id);
+
+    const div = document.createElement("div");
+    div.classList.add("course-card");
+
+    div.innerHTML = `
+        <h3>${course.title}</h3>
+        <p>${course.description}</p>
+        <button id="btn-${course._id}" 
+            onclick="enrollCourse('${course._id}')"
+            ${isEnrolled ? "disabled" : ""}>
+            ${isEnrolled ? "Enrolled ✅" : "Enroll"}
+        </button>
+    `;
+
+    container.appendChild(div);
+});
 
     } catch (error) {
         console.error("Error loading dashboard:", error);

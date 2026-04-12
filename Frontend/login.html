@@ -28,7 +28,6 @@
 </div>
 
 
-
 <script>
 const form = document.getElementById("loginForm");
 const btn = document.getElementById("loginBtn");
@@ -64,9 +63,17 @@ form.addEventListener("submit", async (e) => {
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
+            // ⏳ Delay + role-based redirect
             setTimeout(() => {
-                window.location.href = "dashboard.html";
+                if (data.user.role === "admin") {
+                    window.location.href = "admin-dashboard.html";
+                } else if (data.user.role === "instructor") {
+                    window.location.href = "instructor-dashboard.html";
+                } else {
+                    window.location.href = "dashboard.html";
+                }
             }, 1000);
+
         } else {
             message.style.color = "red";
             message.textContent = data.message || "Invalid credentials";

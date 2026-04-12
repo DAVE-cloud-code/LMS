@@ -29,6 +29,9 @@
 
             <div id="coursesContainer" class="card-grid"></div>
 
+            <h1>My Courses</h1>
+            <div id="myCoursesContainer" class="card-grid"></div>
+
         </main>
 
     </div>
@@ -57,22 +60,31 @@ async function loadCourses() {
         const container = document.getElementById("coursesContainer");
         container.innerHTML = "";
 
-        courses.forEach(course => {
+       const user = JSON.parse(localStorage.getItem("user"));
 
-            const div = document.createElement("div");
-            div.classList.add("course-card");
+courses.forEach(course => {
 
-            div.innerHTML = `
-                <img src="${course.thumbnail || '/images/default.jpg'}" class="course-img"/>
-                <h3>${course.title}</h3>
-                <p>${course.description}</p>
-                <button id="btn-${course._id}" onclick="enrollCourse('${course._id}')">
-                    Enroll
-                </button>
-            `;
+    const isEnrolled = course.students?.includes(user._id);
 
-            container.appendChild(div);
-        });
+    const div = document.createElement("div");
+    div.classList.add("course-card");
+
+    div.innerHTML = `
+        <h3>${course.title}</h3>
+        <p>${course.description}</p>
+        <button id="btn-${course._id}" 
+            onclick="enrollCourse('${course._id}')"
+            ${isEnrolled ? "disabled" : ""}>
+            ${isEnrolled ? "Enrolled ✅" : "Enroll"}
+        </button>
+    `;
+
+    function goToCourse(courseId) {
+    window.location.href = `course.html?id=${courseId}`;
+}
+
+    container.appendChild(div);
+});
 
     } catch (error) {
         console.error("Error:", error);
@@ -111,6 +123,39 @@ async function enrollCourse(courseId) {
 }
 
 loadCourses();
+
+async function loadMyCourses() {
+    try {
+        const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses/my-courses", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const courses = await res.json();
+
+        const container = document.getElementById("myCoursesContainer");
+        container.innerHTML = "";
+
+        courses.forEach(course => {
+            const div = document.createElement("div");
+            div.classList.add("course-card");
+
+            div.innerHTML = `
+                <h3>${course.title}</h3>
+                <p>${course.description}</p>
+                <p>Enrolled ✅</p>
+            `;
+
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+loadMyCourses();
 </script>
 
 </body>

@@ -18,27 +18,67 @@
     </aside>
 
     <main class="main-content">
-        <h1>Web Development Project</h1>
+       <h1 id="assignmentTitle"></h1>
 
-        <div class="assignment-details">
-            <p><strong>Description:</strong></p>
-            <p>Build a responsive landing page using HTML and CSS.</p>
+<div class="assignment-details">
+    <p><strong>Description:</strong></p>
+    <p id="assignmentDescription"></p>
 
-            <p><strong>Due Date:</strong> 25 March 2026</p>
+    <p><strong>Due Date:</strong> <span id="assignmentDueDate"></span></p>
 
-            <hr>
+    <hr>
 
-            <h3>Submit Your Work</h3>
+    <h3>Submit Your Work</h3>
 
-            <form>
-                <input type="file" required>
-                <button type="submit" class="submit-btn">Submit Assignment</button>
-            </form>
-        </div>
-
+    <form id="submitForm">
+        <textarea id="submissionContent" placeholder="Write your submission..." required></textarea>
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Assignment</button>
+        <p id="submitMessage"></p>
+    </form>
+</div>
     </main>
 
 </div>
 
+
+<script>
+const token = localStorage.getItem("token");
+const params = new URLSearchParams(window.location.search);
+const assignmentId = params.get("id");
+
+const titleEl = document.querySelector("h1");
+const descEl = document.querySelector(".assignment-details p:nth-of-type(2)");
+const dueEl = document.querySelector(".assignment-details p:nth-of-type(3)");
+
+async function loadAssignment() {
+    try {
+        const res = await fetch(
+            `https://lms-back-7t0r.onrender.com/api/assignments/${assignmentId}`,
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const assignment = await res.json();
+
+        titleEl.textContent = assignment.title;
+        descEl.textContent = assignment.description;
+        dueEl.innerHTML = `<strong>Due Date:</strong> ${new Date(assignment.dueDate).toDateString()}`;
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+loadAssignment();
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+</script>
 </body>
 </html>
