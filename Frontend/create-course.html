@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Course</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+        <h2>Instructor Panel</h2>
+        <a href="instructor-dashboard.html">Dashboard</a>
+        <a href="instructor-courses.html">My Courses</a>
+        <a href="create-course.html">Create Course</a>
+        <a href="instructor-assignments.html">Assignments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </aside>
+
+    <main class="main-content">
+
+        <h1>Create Course</h1>
+
+        <form id="courseForm">
+            <input type="text" id="title" placeholder="Course Title" required>
+            <input type="text" id="category" placeholder="Category" required>
+            <textarea id="description" placeholder="Description"></textarea>
+
+            <button type="submit" id="createBtn">Create Course</button>
+            <p id="msg"></p>
+        </form>
+
+    </main>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+const form = document.getElementById("courseForm");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("createBtn");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    btn.textContent = "Creating...";
+    btn.disabled = true;
+    msg.textContent = "";
+
+    try {
+        const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title.value,
+                description: description.value,
+                category: category.value
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            msg.style.color = "green";
+            msg.textContent = "Course created successfully 🎉";
+            form.reset();
+        } else {
+            msg.style.color = "red";
+            msg.textContent = data.message;
+        }
+
+    } catch (error) {
+        msg.style.color = "red";
+        msg.textContent = "Something went wrong";
+    }
+
+    btn.textContent = "Create Course";
+    btn.disabled = false;
+});
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
