@@ -29,7 +29,15 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course"
     }
-  ]
+  ],
+
+  resetPasswordToken: {
+    type: String
+  },
+
+  resetPasswordExpire: {
+    type: Date
+  }
 },
 { timestamps: true }
 );
