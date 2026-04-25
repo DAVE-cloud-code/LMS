@@ -128,43 +128,68 @@ exports.getMyCourses = async (req, res) => {
 };
 
 exports.updateCourse = async (req, res) => {
-
   try {
+    const course = await Course.findById(req.params.courseId);
 
-    const course = await Course.findByIdAndUpdate(
-      req.params.courseId,
-      req.body,
-      { new: true }
-    );
+    if (!course) {
+      return res.status(404).json({
+        message: "Course not found"
+      });
+    }
 
-    res.json(course);
+    // ✅ Ownership check
+    if (course.instructor.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not allowed to update this course"
+      });
+    }
+
+    // ✅ Update fields manually 
+    course.title = req.body.title || course.title;
+    course.description = req.body.description || course.description;
+    course.category = req.body.category || course.category;
+    course.thumbnail = req.body.thumbnail || course.thumbnail;
+
+    await course.save();
+
+    res.json({
+      message: "Course updated successfully",
+      course
+    });
 
   } catch (error) {
-
     res.status(500).json({
       message: error.message
     });
-
   }
-
 };
 
 exports.deleteCourse = async (req, res) => {
-
   try {
+    const course = await Course.findById(req.params.courseId);
 
-    await Course.findByIdAndDelete(req.params.courseId);
+    if (!course) {
+      return res.status(404).json({
+        message: "Course not found"
+      });
+    }
+
+    // ✅ Ownership check
+    if (course.instructor.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You are not allowed to delete this course"
+      });
+    }
+
+    await course.deleteOne();
 
     res.json({
       message: "Course deleted successfully"
     });
 
   } catch (error) {
-
     res.status(500).json({
       message: error.message
     });
-
   }
-
 };

@@ -47,7 +47,7 @@ async function loadCourses() {
 
     const courses = await res.json();
 
-    const myCourses = courses.filter(c => c.instructor === user._id);
+        const myCourses = courses.filter(c => c.instructor._id === user._id);
 
     container.innerHTML = "";
 
@@ -58,6 +58,7 @@ async function loadCourses() {
         card.innerHTML = `
             <h3>${course.title}</h3>
             <p>${course.category}</p>
+            <p>${course.description}</p>
         `;
 
         container.appendChild(card);

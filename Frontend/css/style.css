@@ -7,7 +7,7 @@
 
 :root {
     --primary: #22c55e;      /* light green */
-    --primary-dark: #16a34a;
+    --primary-dark: 2;
     --bg-light: #f0fdf4;
     --white: #ffffff;
     --text-dark: #1f2937;
@@ -17,9 +17,11 @@ body {
     min-height: 100vh;
     background: #f3f4f6;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px; /* extra padding for mobile */
+    text-decoration: none;
 }
 
 .auth-wrapper {
@@ -30,7 +32,7 @@ body {
 
 .auth-card {
     background: var(--white);
-    width: 35%;
+    width: 40%;
     max-width: 100%; /* make sure it doesn't overflow on small screens */
     padding: 40px;
     border-radius: 10px;

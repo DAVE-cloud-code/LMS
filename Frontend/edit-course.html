@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Course</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+        <h2>Instructor Panel</h2>
+        <a href="instructor-dashboard.html">Dashboard</a>
+        <a href="instructor-courses.html">My Courses</a>
+        <a href="create-course.html">Create Course</a>
+        <a href="instructor-assignments.html">Assignments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </aside>
+
+    <main class="main-content">
+
+        <h1>Edit Course</h1>
+
+        <form id="editForm">
+            <input type="text" id="title" placeholder="Course Title" required>
+            <input type="text" id="category" placeholder="Category" required>
+            <textarea id="description" placeholder="Description"></textarea>
+            <input type="text" id="thumbnail" placeholder="Thumbnail URL">
+
+            <button type="submit" id="updateBtn">Update Course</button>
+            <p id="msg"></p>
+        </form>
+
+    </main>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+// 📌 Get course ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const courseId = urlParams.get("id");
+
+const msg = document.getElementById("msg");
+const btn = document.getElementById("updateBtn");
+
+// 🔹 Load course details
+async function loadCourse() {
+    try {
+        const res = await fetch(`https://lms-back-7t0r.onrender.com/api/courses`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const courses = await res.json();
+
+        const course = courses.find(c => c._id === courseId);
+
+        if (!course) {
+            msg.textContent = "Course not found";
+            return;
+        }
+
+        // ✅ Fill form
+        document.getElementById("title").value = course.title;
+        document.getElementById("category").value = course.category;
+        document.getElementById("description").value = course.description;
+        document.getElementById("thumbnail").value = course.thumbnail || "";
+
+    } catch (err) {
+        msg.textContent = "Error loading course";
+    }
+}
+
+loadCourse();
+
+
+// 🔹 Update course
+document.getElementById("editForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    btn.textContent = "Updating...";
+    btn.disabled = true;
+    msg.textContent = "";
+
+    try {
+        const res = await fetch(`https://lms-back-7t0r.onrender.com/api/courses/${courseId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title.value,
+                description: description.value,
+                category: category.value,
+                thumbnail: thumbnail.value
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            msg.style.color = "green";
+            msg.textContent = "Course updated successfully 🎉";
+
+            setTimeout(() => {
+                window.location.href = "instructor-courses.html";
+            }, 1200);
+        } else {
+            msg.style.color = "red";
+            msg.textContent = data.message;
+        }
+
+    } catch (error) {
+        msg.style.color = "red";
+        msg.textContent = "Something went wrong";
+    }
+
+    btn.textContent = "Update Course";
+    btn.disabled = false;
+});
+
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

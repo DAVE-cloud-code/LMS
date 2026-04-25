@@ -1,30 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instructor Assignments</title>
+    <title>Create Assignment</title>
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
 
 <div class="dashboard">
 
-    <aside class="sidebar">
-        <h2>Instructor Panel</h2>
-        <a href="instructor-dashboard.html">Dashboard</a>
-        <a href="instructor-courses.html">My Courses</a>
-        <a href="create-course.html">Create Course</a>
-        <a href="instructor-assignments.html">Assignments</a>
-        <a href="#" onclick="logout()">Logout</a>
-    </aside>
+<aside class="sidebar">
+    <h2>Instructor Panel</h2>
+    <a href="instructor-dashboard.html">Dashboard</a>
+    <a href="instructor-courses.html">My Courses</a>
+    <a href="create-course.html">Create Course</a>
+    <a href="create-assignment.html">Assignments</a>
+    <a href="#" onclick="logout()">Logout</a>
+</aside>
 
-    <main class="main-content">
-        <h1>Assignments</h1>
-        <p>Coming next... (create & manage assignments)</p>
-    </main>
+<main class="main-content">
 
+<h1>Create Assignment</h1>
+
+<form id="assignmentForm">
+    <select id="courseSelect" required></select>
+    <input type="text" id="title" placeholder="Assignment Title" required>
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="date" id="dueDate" required>
+
+    <button type="submit" id="btn">Create Assignment</button>
+    <p id="msg"></p>
+</form>
+
+</main>
 </div>
 
 <script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+const select = document.getElementById("courseSelect");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("btn");
+
+// 🔹 Load instructor courses
+async function loadCourses() {
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const courses = await res.json();
+
+    const myCourses = courses.filter(c => c.instructor._id === user._id);
+
+    myCourses.forEach(course => {
+        const option = document.createElement("option");
+        option.value = course._id;
+        option.textContent = course.title;
+        select.appendChild(option);
+    });
+}
+
+loadCourses();
+
+// 🔹 Submit assignment
+document.getElementById("assignmentForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    btn.textContent = "Creating...";
+    btn.disabled = true;
+
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/assignments/create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            title: title.value,
+            description: description.value,
+            dueDate: dueDate.value,
+            courseId: select.value
+        })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        msg.style.color = "green";
+        msg.textContent = "Assignment created 🎉";
+    } else {
+        msg.style.color = "red";
+        msg.textContent = data.message;
+    }
+
+    btn.textContent = "Create Assignment";
+    btn.disabled = false;
+});
+
 function logout() {
     localStorage.clear();
     window.location.href = "login.html";

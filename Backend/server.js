@@ -8,6 +8,7 @@ const lessonRoutes = require("./routes/lesson");
 const assignmentRoutes = require("./routes/assignment");
 const submissionRoutes = require("./routes/submission");
 const cors = require("cors");
+const attendanceRoutes = require("./routes/attendance");
 
 dotenv.config();
 const app = express();
@@ -36,7 +37,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
-
+app.use("/api/attendance", attendanceRoutes);
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

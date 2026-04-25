@@ -3,6 +3,31 @@
 <head>
     <title>My Courses</title>
     <link rel="stylesheet" href="css/dashboard.css">
+
+    <style>
+        .course-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.course-actions button {
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.course-actions button:first-child {
+    background: #3498db;
+    color: white;
+}
+
+.course-actions button:last-child {
+    background: red;
+    color: white;
+}
+    </style>
 </head>
 <body>
 
@@ -24,7 +49,6 @@
     </main>
 
 </div>
-
 <script>
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user"));
@@ -35,32 +59,88 @@ if (!token || user.role !== "instructor") {
 
 const container = document.getElementById("courseContainer");
 
+// 🔹 Load instructor courses
 async function loadCourses() {
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+        const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
-    const courses = await res.json();
+        const courses = await res.json();
 
-    const myCourses = courses.filter(c => c.instructor === user._id);
+        console.log("ALL COURSES:", courses); // 🔍 debug
 
-    container.innerHTML = "";
+        // ✅ FIXED FILTER
+        const myCourses = courses.filter(c => c.instructor._id === user._id);
 
-    myCourses.forEach(course => {
-        const card = document.createElement("div");
-        card.className = "course-card";
+        container.innerHTML = "";
 
-        card.innerHTML = `
-            <h3>${course.title}</h3>
-            <p>${course.category}</p>
-            <p>${course.description}</p>
-        `;
+        if (myCourses.length === 0) {
+            container.innerHTML = "<p>No courses yet</p>";
+            return;
+        }
 
-        container.appendChild(card);
-    });
+        myCourses.forEach(course => {
+            const card = document.createElement("div");
+            card.className = "course-card";
+
+            card.innerHTML = `
+                <img src="${course.thumbnail || '/images/default.jpg'}" class="course-img">
+
+                <h3>${course.title}</h3>
+                <p><strong>Category:</strong> ${course.category}</p>
+                <p>${course.description}</p>
+
+                <div class="course-actions">
+                    <button onclick="editCourse('${course._id}')">Edit</button>
+                    <button onclick="deleteCourse('${course._id}')">Delete</button>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+    } catch (err) {
+        container.innerHTML = "<p>Error loading courses</p>";
+    }
 }
 
 loadCourses();
+
+
+// ✏️ EDIT COURSE (redirect for now)
+function editCourse(courseId) {
+    window.location.href = `edit-course.html?id=${courseId}`;
+}
+
+
+// 🗑 DELETE COURSE
+async function deleteCourse(courseId) {
+    const confirmDelete = confirm("Are you sure you want to delete this course?");
+    if (!confirmDelete) return;
+
+    try {
+        const res = await fetch(`https://lms-back-7t0r.onrender.com/api/courses/${courseId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("Course deleted successfully");
+            loadCourses(); // 🔄 refresh
+        } else {
+            alert(data.message);
+        }
+
+    } catch (err) {
+        alert("Error deleting course");
+    }
+}
+
 
 function logout() {
     localStorage.clear();
