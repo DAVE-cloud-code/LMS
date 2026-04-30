@@ -70,7 +70,8 @@ exports.getAllCourses = async (req, res) => {
   try {
 
     const courses = await Course.find()
-      .populate("instructor", "fullname email");
+      .populate("instructor", "fullname email")
+      .populate("students", "fullname email"); ;
 
     res.json(courses);
 
@@ -83,12 +84,14 @@ exports.getAllCourses = async (req, res) => {
   }
 };
 
+
 exports.getCourse = async (req, res) => {
   try {
 
     const course = await Course.findById(req.params.courseId)
       .populate("lessons")
-      .populate("instructor", "fullname email");
+      .populate("instructor", "fullname email")
+      .populate("students", "fullname email"); // 👈 ADD THIS
 
     if (!course) {
       return res.status(404).json({

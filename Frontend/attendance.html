@@ -61,30 +61,34 @@ async function loadCourses() {
         courseSelect.appendChild(option);
     });
 
+if (myCourses.length > 0) {
+    courseSelect.value = myCourses[0]._id;
     loadStudents();
+}
+
 }
 
 // 🔹 Load students of selected course
 async function loadStudents() {
     const courseId = courseSelect.value;
 
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+    const res = await fetch(`https://lms-back-7t0r.onrender.com/api/courses/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
 
-    const courses = await res.json();
-    const course = courses.find(c => c._id === courseId);
+    const course = await res.json();
 
     studentList.innerHTML = "";
-
     attendanceData = [];
 
-    course.students.forEach(studentId => {
+    course.students.forEach(student => {
+
         const div = document.createElement("div");
+        div.className = "attendance-row";
 
         div.innerHTML = `
-            <p>${studentId}</p>
-            <select onchange="updateAttendance('${studentId}', this.value)">
+            <span>${student.fullname}</span>
+            <select onchange="updateAttendance('${student._id}', this.value)">
                 <option value="present">Present</option>
                 <option value="absent">Absent</option>
             </select>
@@ -93,7 +97,7 @@ async function loadStudents() {
         studentList.appendChild(div);
 
         attendanceData.push({
-            studentId,
+            studentId: student._id,
             status: "present"
         });
     });
