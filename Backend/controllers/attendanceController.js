@@ -32,3 +32,18 @@ exports.getCourseAttendance = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getStudentAttendance = async (req, res) => {
+  try {
+    const attendance = await Attendance.find({
+      student: req.user.id
+    }).populate("course", "title");
+
+    res.json(attendance);
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};

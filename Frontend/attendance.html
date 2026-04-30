@@ -1,24 +1,137 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mark Attendance</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Attendance</title>
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
 
-<div class="simple-page">
+<div class="dashboard">
+
+<aside class="sidebar">
+    <h2>Instructor Panel</h2>
+    <a href="instructor-dashboard.html">Dashboard</a>
+    <a href="instructor-courses.html">My Courses</a>
+    <a href="create-course.html">Create Course</a>
+    <a href="instructor-assignments.html">Assignments</a>
+    <a href="attendance.html">Attendance</a>
+</aside>
+
+<main class="main-content">
     <h1>Mark Attendance</h1>
 
-    <p>Select today's attendance status:</p>
+    <!-- Course Select -->
+    <select id="courseSelect"></select>
 
-    <form>
-        <button type="submit" class="btn-green">Present</button>
-        <button type="submit" class="btn-outline">Absent</button>
-    </form>
+    <div id="studentList"></div>
 
-    <br>
-    <a href="dashboard.html">← Back to Dashboard</a>
+    <button onclick="submitAttendance()">Save Attendance</button>
+    <p id="msg"></p>
+</main>
+
 </div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+const courseSelect = document.getElementById("courseSelect");
+const studentList = document.getElementById("studentList");
+
+let attendanceData = [];
+
+// 🔹 Load instructor courses
+async function loadCourses() {
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const courses = await res.json();
+
+    const myCourses = courses.filter(c => c.instructor._id === user._id);
+
+    myCourses.forEach(course => {
+        const option = document.createElement("option");
+        option.value = course._id;
+        option.textContent = course.title;
+        courseSelect.appendChild(option);
+    });
+
+    loadStudents();
+}
+
+// 🔹 Load students of selected course
+async function loadStudents() {
+    const courseId = courseSelect.value;
+
+    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const courses = await res.json();
+    const course = courses.find(c => c._id === courseId);
+
+    studentList.innerHTML = "";
+
+    attendanceData = [];
+
+    course.students.forEach(studentId => {
+        const div = document.createElement("div");
+
+        div.innerHTML = `
+            <p>${studentId}</p>
+            <select onchange="updateAttendance('${studentId}', this.value)">
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+            </select>
+        `;
+
+        studentList.appendChild(div);
+
+        attendanceData.push({
+            studentId,
+            status: "present"
+        });
+    });
+}
+
+// 🔹 Update local state
+function updateAttendance(studentId, status) {
+    const record = attendanceData.find(a => a.studentId === studentId);
+    record.status = status;
+}
+
+// 🔹 Submit to backend
+async function submitAttendance() {
+    const courseId = courseSelect.value;
+
+    for (let record of attendanceData) {
+        await fetch("https://lms-back-7t0r.onrender.com/api/attendance/mark", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                courseId,
+                studentId: record.studentId,
+                status: record.status
+            })
+        });
+    }
+
+    document.getElementById("msg").textContent = "Attendance saved!";
+}
+
+// change course
+courseSelect.addEventListener("change", loadStudents);
+
+loadCourses();
+</script>
 
 </body>
 </html>

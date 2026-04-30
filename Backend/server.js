@@ -38,6 +38,8 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/attendance", attendanceRoutes);
+
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
