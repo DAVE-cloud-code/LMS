@@ -12,4 +12,6 @@ router.post("/mark", auth, authorizeRoles("instructor", "admin"), attendanceCont
 // Get attendance
 router.get("/course/:courseId", auth, attendanceController.getCourseAttendance);
 
+router.get("/my", auth, attendanceController.getMyAttendance);
+
 module.exports = router;

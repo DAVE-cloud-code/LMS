@@ -47,3 +47,17 @@ exports.getStudentAttendance = async (req, res) => {
     });
   }
 };
+
+
+exports.getMyAttendance = async (req, res) => {
+  try {
+
+    const records = await Attendance.find({ student: req.user.id })
+      .populate("course", "title");
+
+    res.json(records);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
