@@ -78,12 +78,11 @@ form button {
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
-    transition: background 0.3s ease;
 }
 
-form button:hover {
+/* form button:hover {
     background: var(--primary-dark);
-}
+} */
 
 .switch-text {
     margin-top: 20px;
@@ -117,5 +116,5 @@ form button:hover {
     .sub-text, .switch-text {
         font-size: 13px;
     }
-    
+
 }
