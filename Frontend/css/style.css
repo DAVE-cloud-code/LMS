@@ -24,6 +24,11 @@ body {
     text-decoration: none;
 }
 
+.new img{
+    width: 10vw;
+    
+}
+
 .auth-wrapper {
     width: 100%;
     display: flex;
@@ -112,4 +117,5 @@ form button:hover {
     .sub-text, .switch-text {
         font-size: 13px;
     }
+    
 }
