@@ -7,14 +7,13 @@ exports.startClass = async (req, res) => {
 
     try {
 
-        const { courseId, topic } = req.body;
+        const { topic } = req.body;
 
         // generate random attendance code
         const attendanceCode =
             Math.floor(10000 + Math.random() * 90000).toString();
 
         const session = await ClassSession.create({
-            course: courseId,
             instructor: req.user.id,
             topic,
             attendanceCode

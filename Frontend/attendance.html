@@ -15,6 +15,7 @@
     <a href="create-course.html">Create Course</a>
     <a href="instructor-assignments.html">Assignments</a>
     <a href="attendance.html">Attendance</a>
+    <a href="#" onclick="logout()">Logout</a>
 </aside>
 <main class="main-content">
 
@@ -22,7 +23,6 @@
 
     <form id="classForm">
 
-        <select id="course"></select>
 
         <input
             type="text"
@@ -61,43 +61,6 @@ if (!token || user.role !== "instructor") {
 
 const courseSelect = document.getElementById("course");
 
-
-
-// ✅ Load instructor courses
-async function loadCourses(){
-
-    const res = await fetch(
-        "https://lms-back-7t0r.onrender.com/api/courses",
-        {
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-        }
-    );
-
-    const courses = await res.json();
-
-    const myCourses = courses.filter(
-        c => c.instructor._id === user._id
-    );
-
-    myCourses.forEach(course => {
-
-        courseSelect.innerHTML += `
-            <option value="${course._id}">
-                ${course.title}
-            </option>
-        `;
-
-    });
-
-}
-
-loadCourses();
-
-
-
-
 // ✅ Start class
 document
 .getElementById("classForm")
@@ -114,7 +77,6 @@ document
                 Authorization:`Bearer ${token}`
             },
             body:JSON.stringify({
-                courseId: course.value,
                 topic: topic.value
             })
         }
@@ -162,36 +124,53 @@ async function loadSessions(){
     sessions.forEach(session=>{
 
         container.innerHTML += `
-            <div class="course-card">
+    <div class="course-card">
 
-                <h3>${session.course.title}</h3>
+        <p>
+            Topic:
+            ${session.topic}
+        </p>
 
-                <p>
-                    Topic:
-                    ${session.topic}
-                </p>
+        <p>
+            Attendance:
+            ${session.studentsPresent.length}
+            students
+        </p>
 
-                <p>
-                    Attendance:
-                    ${session.studentsPresent.length}
-                    students
-                </p>
+        <p>
+            Code:
+            <strong>
+                ${session.attendanceCode}
+            </strong>
+        </p>
 
-                <p>
-                    Code:
-                    <strong>
-                        ${session.attendanceCode}
-                    </strong>
-                </p>
+        <p>
+            Status:
+            ${
+                session.isActive
+                ? "🟢 Active"
+                : "🔴 Ended"
+            }
+        </p>
 
-                <button
-                    onclick="endClass('${session._id}')"
-                >
-                    End Class
-                </button>
+        ${
+            session.isActive
+            ?
+            `
+            <button onclick="endClass('${session._id}')">
+                End Class
+            </button>
+            `
+            :
+            `
+            <button disabled>
+                Class Ended
+            </button>
+            `
+        }
 
-            </div>
-        `;
+    </div>
+`;
 
     });
 
