@@ -52,12 +52,32 @@ exports.getStudentAttendance = async (req, res) => {
 exports.getMyAttendance = async (req, res) => {
   try {
 
-    const records = await Attendance.find({ student: req.user.id })
-      .populate("course", "title");
+    const attendance = await Attendance.find({
+      "records.studentId": req.user.id
+    }).populate("course", "title");
 
-    res.json(records);
+    // filter only this student's record
+    const formatted = attendance.map(item => {
+
+      const studentRecord = item.records.find(
+        r => r.studentId.toString() === req.user.id
+      );
+
+      return {
+        _id: item._id,
+        course: item.course,
+        date: item.date,
+        status: studentRecord.status
+      };
+    });
+
+    res.json(formatted);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      message: error.message
+    });
+
   }
 };

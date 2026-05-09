@@ -18,63 +18,120 @@
     <a href="#" onclick="logout()">Logout</a>
 </aside>
 
-<!-- Main -->
 <main class="main-content">
-    <h1>My Attendance</h1>
 
-    <div id="attendanceContainer"></div>
+    <h1>Mark Attendance</h1>
+
+    <form id="attendanceForm">
+
+        <input
+            type="text"
+            id="code"
+            placeholder="Enter Attendance Code"
+            required
+        >
+
+        <button type="submit">
+            Mark Attendance
+        </button>
+
+        <p id="msg"></p>
+
+    </form>
+
+    <hr>
+
+    <h2>Attendance History</h2>
+
+    <div id="history"></div>
+
 </main>
 
 </div>
 
 <script>
+
 const token = localStorage.getItem("token");
-const user = JSON.parse(localStorage.getItem("user"));
 
-if (!token || user.role !== "student") {
-    window.location.href = "login.html";
-}
 
-const container = document.getElementById("attendanceContainer");
 
-// 🔹 Load attendance
-async function loadAttendance() {
+// ✅ Mark attendance
+document
+.getElementById("attendanceForm")
+.addEventListener("submit", async (e)=>{
 
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/attendance/my", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    e.preventDefault();
 
-    const records = await res.json();
+    const res = await fetch(
+        "https://lms-back-7t0r.onrender.com/api/class/mark",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                Authorization:`Bearer ${token}`
+            },
+            body:JSON.stringify({
+                code: code.value
+            })
+        }
+    );
 
-    container.innerHTML = "";
+    const data = await res.json();
 
-    if (records.length === 0) {
-        container.innerHTML = "<p>No attendance records yet.</p>";
-        return;
-    }
+    document.getElementById("msg").textContent =
+        data.message;
 
-    records.forEach(record => {
+    loadHistory();
 
-        const div = document.createElement("div");
-        div.className = "attendance-card";
+});
 
-        const date = new Date(record.createdAt).toLocaleDateString();
 
-        div.innerHTML = `
-            <h3>${record.course.title}</h3>
-            <p>Date: ${date}</p>
-            <p>Status: 
-                <span class="${record.status === 'present' ? 'present' : 'absent'}">
-                    ${record.status}
-                </span>
-            </p>
+
+
+// ✅ Load attendance history
+async function loadHistory(){
+
+    const res = await fetch(
+        "https://lms-back-7t0r.onrender.com/api/class/student",
+        {
+            headers:{
+                Authorization:`Bearer ${token}`
+            }
+        }
+    );
+
+    const sessions = await res.json();
+
+    const history =
+        document.getElementById("history");
+
+    history.innerHTML = "";
+
+    sessions.forEach(session=>{
+
+        history.innerHTML += `
+            <div class="course-card">
+
+                <h3>${session.course.title}</h3>
+
+                <p>
+                    Topic:
+                    ${session.topic}
+                </p>
+
+                <p>
+                    Instructor:
+                    ${session.instructor.fullname}
+                </p>
+
+            </div>
         `;
 
-        container.appendChild(div);
     });
+
 }
 
-loadAttendance();
+loadHistory();
 
 // logout
 function logout() {

@@ -9,6 +9,7 @@ const assignmentRoutes = require("./routes/assignment");
 const submissionRoutes = require("./routes/submission");
 const cors = require("cors");
 const attendanceRoutes = require("./routes/attendance");
+const classSessionRoutes = require("./routes/classSession");
 
 dotenv.config();
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/class", classSessionRoutes);
 
 
 // Error handler
