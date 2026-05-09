@@ -118,12 +118,10 @@ exports.getInstructorSessions = async (req, res) => {
     try {
 
         const sessions = await ClassSession.find({
-            instructor: req.user.id
-        })
-        .populate("course", "title")
-        .populate("studentsPresent", "fullname email")
-        .sort({ createdAt: -1 });
-
+    instructor: req.user.id
+})
+.populate("studentsPresent", "fullname email")
+.sort({ createdAt: -1 });
         res.json(sessions);
 
     } catch (error) {
@@ -147,7 +145,6 @@ exports.getStudentAttendance = async (req, res) => {
         const sessions = await ClassSession.find({
             studentsPresent: req.user.id
         })
-        .populate("course", "title")
         .populate("instructor", "fullname");
 
         res.json(sessions);
