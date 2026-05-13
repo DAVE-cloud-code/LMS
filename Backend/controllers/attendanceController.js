@@ -81,3 +81,26 @@ exports.getMyAttendance = async (req, res) => {
 
   }
 };
+
+// ✅ Get attendance history
+exports.getAttendanceHistory = async (req, res) => {
+
+    try {
+
+        const history = await Attendance.find({
+            instructor: req.user.id
+        })
+        .populate("records.student", "fullname")
+        .sort({ createdAt: -1 });
+
+        res.json(history);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
+};

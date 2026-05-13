@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance History</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>Instructor Panel</h2>
+
+        <a href="instructor-dashboard.html">Dashboard</a>
+        <a href="students.html">Students</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="attendance-history.html">Attendance History</a>
+        <a href="instructor-assignments.html">Assignments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <h1>Attendance History</h1>
+
+        <div id="historyContainer"></div>
+
+    </main>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+const container = document.getElementById("historyContainer");
+
+// ✅ Load attendance history
+async function loadHistory() {
+
+    try {
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/attendance/history",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        const history = await res.json();
+
+        container.innerHTML = "";
+
+        if (history.length === 0) {
+            container.innerHTML = `
+                <p>No attendance records yet.</p>
+            `;
+            return;
+        }
+
+        history.forEach(session => {
+
+            const date = new Date(session.createdAt)
+                .toLocaleDateString();
+
+            let recordsHTML = "";
+
+            session.records.forEach(record => {
+
+                recordsHTML += `
+                    <div class="attendance-record">
+
+                        <p>
+                            <strong>
+                                ${record.student?.fullname || "Unknown Student"}
+                            </strong>
+                        </p>
+
+                        <p>
+                            ${
+                                record.status === "present"
+                                ? "🟢 Present"
+                                : "🔴 Absent"
+                            }
+                        </p>
+
+                    </div>
+                `;
+            });
+
+            container.innerHTML += `
+                <div class="course-card">
+
+                    <h2>
+                        Attendance Record
+                    </h2>
+
+                    <p>
+                        <strong>Date:</strong>
+                        ${date}
+                    </p>
+
+                    <hr>
+
+                    ${recordsHTML}
+
+                </div>
+            `;
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        container.innerHTML = `
+            <p>Failed to load attendance history.</p>
+        `;
+    }
+}
+
+// ✅ Logout
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>

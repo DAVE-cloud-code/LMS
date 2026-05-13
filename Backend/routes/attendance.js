@@ -13,5 +13,10 @@ router.post("/mark", auth, authorizeRoles("instructor", "admin"), attendanceCont
 router.get("/course/:courseId", auth, attendanceController.getCourseAttendance);
 
 router.get("/my", auth, attendanceController.getMyAttendance);
+router.get(
+    "/history",
+    auth,
+    attendanceController.getAttendanceHistory
+);
 
 module.exports = router;
