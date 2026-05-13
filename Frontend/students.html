@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+<aside class="sidebar">
+    <h2>Instructor Panel</h2>
+
+    <a href="instructor-dashboard.html">Dashboard</a>
+    <a href="students.html">Students</a>
+    <a href="attendance.html">Attendance</a>
+</aside>
+
+<main class="main-content">
+
+    <h1>Manage Students</h1>
+
+    <form id="studentForm">
+
+        <input
+            type="text"
+            id="fullname"
+            placeholder="Student Name"
+            required
+        >
+
+        <button type="submit">
+            Add Student
+        </button>
+
+    </form>
+
+    <div id="studentList"></div>
+
+</main>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+const form = document.getElementById("studentForm");
+
+const studentList = document.getElementById("studentList");
+
+// ✅ Load students
+async function loadStudents() {
+
+    const res = await fetch(
+        "https://lms-back-7t0r.onrender.com/api/students",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    const students = await res.json();
+
+    studentList.innerHTML = "";
+
+    students.forEach(student => {
+
+        studentList.innerHTML += `
+            <div class="course-card">
+
+                <h3>${student.fullname}</h3>
+
+                <button onclick="deleteStudent('${student._id}')">
+                    Delete
+                </button>
+
+            </div>
+        `;
+    });
+}
+
+// ✅ Add student
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    await fetch(
+        "https://lms-back-7t0r.onrender.com/api/students/add",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+
+            body: JSON.stringify({
+                fullname: fullname.value
+            })
+        }
+    );
+
+    form.reset();
+
+    loadStudents();
+});
+
+// ✅ Delete student
+async function deleteStudent(id) {
+
+    await fetch(
+        `https://lms-back-7t0r.onrender.com/api/students/${id}`,
+        {
+            method: "DELETE",
+
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    loadStudents();
+}
+
+loadStudents();
+</script>
+
+</body>
+</html>

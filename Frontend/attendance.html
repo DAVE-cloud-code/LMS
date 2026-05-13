@@ -17,193 +17,117 @@
     <a href="attendance.html">Attendance</a>
     <a href="#" onclick="logout()">Logout</a>
 </aside>
+
 <main class="main-content">
 
-    <h1>Start Class</h1>
+    <h1>Mark Attendance</h1>
 
-    <form id="classForm">
+    <div id="studentContainer"></div>
 
+    <button onclick="saveAttendance()">
+        Save Attendance
+    </button>
 
-        <input
-            type="text"
-            id="topic"
-            placeholder="Class Topic"
-            required
-        >
-
-        <button type="submit" id="btn">
-            Start Class
-        </button>
-
-        <p id="msg"></p>
-
-    </form>
-
-    <hr>
-
-    <h2>My Sessions</h2>
-
-    <div id="sessionContainer"></div>
+    <p id="msg"></p>
 
 </main>
 
 </div>
 
 <script>
-
 const token = localStorage.getItem("token");
 
-const user = JSON.parse(localStorage.getItem("user"));
+const container = document.getElementById("studentContainer");
 
-if (!token || user.role !== "instructor") {
-    window.location.href = "login.html";
-}
+let attendanceRecords = [];
 
-const courseSelect = document.getElementById("course");
-
-// ✅ Start class
-document
-.getElementById("classForm")
-.addEventListener("submit", async (e)=>{
-
-    e.preventDefault();
+// ✅ Load students
+async function loadStudents() {
 
     const res = await fetch(
-        "https://lms-back-7t0r.onrender.com/api/class/start",
+        "https://lms-back-7t0r.onrender.com/api/students",
         {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json",
-                Authorization:`Bearer ${token}`
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    const students = await res.json();
+
+    container.innerHTML = "";
+
+    attendanceRecords = [];
+
+    students.forEach(student => {
+
+        container.innerHTML += `
+            <div class="course-card">
+
+                <h3>${student.fullname}</h3>
+
+                <select
+                    onchange="updateStatus('${student._id}', this.value)"
+                >
+                    <option value="present">
+                        Present
+                    </option>
+
+                    <option value="absent">
+                        Absent
+                    </option>
+                </select>
+
+            </div>
+        `;
+
+        attendanceRecords.push({
+            student: student._id,
+            status: "present"
+        });
+    });
+}
+
+// ✅ Update attendance status
+function updateStatus(studentId, status) {
+
+    const record = attendanceRecords.find(
+        r => r.student === studentId
+    );
+
+    record.status = status;
+}
+
+// ✅ Save attendance
+async function saveAttendance() {
+
+    await fetch(
+        "https://lms-back-7t0r.onrender.com/api/attendance/mark",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
             },
-            body:JSON.stringify({
-                topic: topic.value
+
+            body: JSON.stringify({
+                records: attendanceRecords
             })
         }
     );
 
-    const data = await res.json();
-
-    if(res.ok){
-
-        document.getElementById("msg").innerHTML = `
-            Class Started ✅ <br><br>
-
-            Attendance Code:
-            <strong>${data.session.attendanceCode}</strong>
-        `;
-
-        loadSessions();
-
-    }
-
-});
-
-
-
-
-// ✅ Load sessions
-async function loadSessions(){
-
-    const res = await fetch(
-        "https://lms-back-7t0r.onrender.com/api/class/instructor",
-        {
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-        }
-    );
-
-    const sessions = await res.json();
-
-    const container =
-        document.getElementById("sessionContainer");
-
-    container.innerHTML = "";
-
-    sessions.forEach(session=>{
-
-        container.innerHTML += `
-    <div class="course-card">
-
-        <p>
-            Topic:
-            ${session.topic}
-        </p>
-
-        <p>
-            Attendance:
-            ${session.studentsPresent.length}
-            students
-        </p>
-
-        <p>
-            Code:
-            <strong>
-                ${session.attendanceCode}
-            </strong>
-        </p>
-
-        <p>
-            Status:
-            ${
-                session.isActive
-                ? "🟢 Active"
-                : "🔴 Ended"
-            }
-        </p>
-
-        ${
-            session.isActive
-            ?
-            `
-            <button onclick="endClass('${session._id}')">
-                End Class
-            </button>
-            `
-            :
-            `
-            <button disabled>
-                Class Ended
-            </button>
-            `
-        }
-
-    </div>
-`;
-
-    });
-
+    document.getElementById("msg").textContent =
+        "Attendance saved successfully";
 }
 
-loadSessions();
-
-
-
-
-// ✅ End class
-async function endClass(id){
-
-    await fetch(
-        `https://lms-back-7t0r.onrender.com/api/class/end/${id}`,
-        {
-            method:"PUT",
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-        }
-    );
-
-    loadSessions();
-
-}
-
+loadStudents();
 
 function logout() {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     window.location.href = "login.html";
 }
-
 </script>
 
 </body>
