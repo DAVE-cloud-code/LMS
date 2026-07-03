@@ -88,6 +88,29 @@ async function loadCourses() {
 
 loadCourses();
 
+async function loadProfile() {
+
+    const res = await fetch(
+        "https://lms-back-7t0r.onrender.com/api/auth/profile",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    const profile = await res.json();
+
+    document.getElementById("placementState").textContent =
+        profile.placement || "Not Assigned";
+
+    document.getElementById("placementSchool").textContent =
+        profile.school || "Not Assigned";
+
+}
+
+loadProfile();
+
 function logout() {
     localStorage.clear();
     window.location.href = "login.html";
