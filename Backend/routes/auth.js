@@ -31,4 +31,10 @@ router.get(
   authController.getAllUsers
 );
 
+router.get(
+    "/profile",
+    auth,
+    authController.getProfile
+);
+
 module.exports = router;
