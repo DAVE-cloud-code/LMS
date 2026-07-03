@@ -22,7 +22,7 @@ router.get(
     "/instructors",
     auth,
     authorizeRoles("admin"),
-    userController.getAllInstructors
+    authController.getAllInstructors
 );
 router.get(
   "/users",
