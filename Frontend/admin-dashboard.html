@@ -18,60 +18,260 @@
 
     <main class="main-content">
 
-        <h1>Admin Dashboard</h1>
+    <h1>Admin Dashboard</h1>
 
-        <h2>All Users</h2>
-        <div id="usersContainer"></div>
+    <div class="stats">
 
+        <div class="stat-card">
+            <h3>Students</h3>
+            <p id="studentCount">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Instructors</h3>
+            <p id="instructorCount">0</p>
+        </div>
+
+    </div>
+
+    <section class="dashboard-section">
+
+        <h2>Create Instructor</h2>
+
+        <form id="createInstructorForm">
+
+            <input
+                type="text"
+                id="fullname"
+                placeholder="Full Name"
+                required
+            >
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                required
+            >
+
+            <button>Create Instructor</button>
+
+        </form>
+
+    </section>
+
+
+    <section class="dashboard-section">
+
+        <h2>Assign Placement</h2>
+
+        <form id="placementForm">
+
+            <select id="instructorSelect"></select>
+
+            <input
+                type="text"
+                id="placement"
+                placeholder="Placement"
+                required
+            >
+
+            <input
+                type="text"
+                id="school"
+                placeholder="School"
+                required
+            >
+
+            <button>Assign</button>
+
+        </form>
+
+    </section>
+
+
+    <section class="dashboard-section">
+
+        <h2>Students</h2>
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+
+            </thead>
+
+            <tbody id="studentsTable"></tbody>
+
+        </table>
+
+    </section>
+
+
+    <section class="dashboard-section">
+
+        <h2>Instructors</h2>
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Name</th>
+                <th>Email</th>
+                <th>Placement</th>
+                <th>School</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="instructorsTable"></tbody>
+
+        </table>
+
+    </section>
+
+</main>
     </main>
 
 </div>
 
 <script>
-const token = localStorage.getItem("token");
-const user = JSON.parse(localStorage.getItem("user"));
 
-if (!token || user.role !== "admin") {
-    window.location.href = "login.html";
+const studentsTable=document.getElementById("studentsTable");
+const instructorsTable=document.getElementById("instructorsTable");
+const instructorSelect=document.getElementById("instructorSelect");
+
+async function loadUsers(){
+
+const res=await fetch(
+"https://lms-back-7t0r.onrender.com/api/auth/users",
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+});
+
+const users=await res.json();
+
+studentsTable.innerHTML="";
+instructorsTable.innerHTML="";
+instructorSelect.innerHTML="";
+
+const students=users.filter(u=>u.role==="student");
+const instructors=users.filter(u=>u.role==="instructor");
+
+document.getElementById("studentCount").textContent=students.length;
+document.getElementById("instructorCount").textContent=instructors.length;
+
+students.forEach(student=>{
+
+studentsTable.innerHTML+=`
+<tr>
+<td>${student.fullname}</td>
+<td>${student.email}</td>
+</tr>
+`;
+
+});
+
+instructors.forEach(instructor=>{
+
+instructorsTable.innerHTML+=`
+<tr>
+
+<td>${instructor.fullname}</td>
+
+<td>${instructor.email}</td>
+
+<td>${instructor.placement}</td>
+
+<td>${instructor.school}</td>
+
+</tr>
+`;
+
+instructorSelect.innerHTML+=`
+<option value="${instructor._id}">
+${instructor.fullname}
+</option>
+`;
+
+});
+
 }
 
-const container = document.getElementById("usersContainer");
+document.getElementById("createInstructorForm")
+.addEventListener("submit",async e=>{
 
-// 🔹 Load all users
-async function loadUsers() {
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/auth/users", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+e.preventDefault();
 
-    const users = await res.json();
+await fetch(
+"https://lms-back-7t0r.onrender.com/api/auth/create-instructor",
+{
+method:"POST",
 
-    container.innerHTML = "";
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
 
-    users.forEach(u => {
-        const div = document.createElement("div");
+body:JSON.stringify({
 
-        div.innerHTML = `
-            <p>${u.fullname} (${u.role})</p>
-            <button onclick="makeInstructor('${u._id}')">
-                Make Instructor
-            </button>
-        `;
+fullname:fullname.value,
+email:email.value,
+password:password.value
 
-        container.appendChild(div);
-    });
-}
+})
+
+});
 
 loadUsers();
 
-// 🔹 Promote user
-async function makeInstructor(id) {
-    await fetch(`https://lms-back-7t0r.onrender.com/api/auth/make-instructor/${id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` }
-    });
+});
 
-    loadUsers();
-}
+document.getElementById("placementForm")
+.addEventListener("submit",async e=>{
+
+e.preventDefault();
+
+await fetch(
+`https://lms-back-7t0r.onrender.com/api/users/assign-placement/${instructorSelect.value}`,
+{
+
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+
+body:JSON.stringify({
+
+placement:placement.value,
+school:school.value
+
+})
+
+});
+
+loadUsers();
+
+});
+
 
 function logout() {
     localStorage.clear();

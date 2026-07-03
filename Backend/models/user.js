@@ -37,7 +37,17 @@ const userSchema = new mongoose.Schema(
 
   resetPasswordExpire: {
     type: Date
-  }
+  },
+  
+  placement: {
+    type: String,
+    default: "Not Assigned"
+},
+
+school: {
+    type: String,
+    default: "No School Assigned"
+}
 },
 { timestamps: true }
 );

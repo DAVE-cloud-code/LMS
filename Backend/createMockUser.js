@@ -5,25 +5,25 @@ require("dotenv").config();
 const User = require("./models/user");
 
 mongoose.connect(process.env.MONGODB_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
 
-const createAdmin = async () => {
+const createInstructor = async () => {
 
   try {
 
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    const hashedPassword = await bcrypt.hash("instructor123", 10);
 
-    const admin = new User({
-      fullname: "Super Admin",
-      email: "admin@lms.com",
+    const instructor = new User({
+      fullname: "John Doe",
+      email: "instructor@lms.com",
       password: hashedPassword,
-      role: "admin"
+      role: "instructor"
     });
 
-    await admin.save();
+    await instructor.save();
 
-    console.log("Admin created successfully");
+    console.log("Instructor created successfully");
 
     process.exit();
 
@@ -36,4 +36,4 @@ const createAdmin = async () => {
 
 };
 
-createAdmin();
+createInstructor();

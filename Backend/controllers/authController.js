@@ -31,6 +31,86 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.createInstructor = async (req, res) => {
+
+    try {
+
+        const {
+            fullname,
+            email,
+            password
+        } = req.body;
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).json({
+                message: "Instructor already exists."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const instructor = await User.create({
+            fullname,
+            email,
+            password: hashedPassword,
+            role: "instructor"
+        });
+
+        res.status(201).json({
+            message: "Instructor created successfully.",
+            instructor
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+};
+
+exports.getAllInstructors = async (req, res) => {
+
+    try {
+
+        const instructors = await User.find({
+            role: "instructor"
+        }).select("-password");
+
+        res.json(instructors);
+
+    } catch (err) {
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+
+    const users = await User.find()
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(users);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message
+    });
+
+  }
+};
+
 
 exports.login = async (req, res) => {
   try {
