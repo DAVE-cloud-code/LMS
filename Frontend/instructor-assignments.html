@@ -3,6 +3,119 @@
 <head>
     <title>Create Assignment</title>
     <link rel="stylesheet" href="css/dashboard.css">
+
+    <style>
+
+:root{
+    --primary:#22c55e;
+    --primary-dark:#16a34a;
+    --bg-light:#f0fdf4;
+    --white:#ffffff;
+    --text-dark:#1f2937;
+}
+
+body{
+    margin:0;
+    background:var(--bg-light);
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.main-content{
+    flex:1;
+    padding:40px;
+}
+
+.page-title{
+    color:var(--primary-dark);
+    font-size:32px;
+    margin-bottom:30px;
+}
+
+.assignment-card{
+    max-width:700px;
+    background:var(--white);
+    padding:35px;
+    border-radius:16px;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.assignment-card label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:var(--text-dark);
+}
+
+.assignment-card input,
+.assignment-card textarea,
+.assignment-card select{
+    width:100%;
+    padding:14px;
+    margin-bottom:20px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+    transition:.3s;
+    background:#fff;
+}
+
+.assignment-card textarea{
+    resize:vertical;
+    min-height:140px;
+}
+
+.assignment-card input:focus,
+.assignment-card textarea:focus,
+.assignment-card select:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(34,197,94,.2);
+}
+
+#createBtn{
+    width:100%;
+    padding:15px;
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+#createBtn:hover{
+    background:var(--primary-dark);
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(34,197,94,.25);
+}
+
+#createBtn:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+#msg{
+    margin-top:20px;
+    text-align:center;
+    font-weight:bold;
+    font-size:16px;
+}
+
+@media(max-width:768px){
+
+    .main-content{
+        padding:20px;
+    }
+
+    .assignment-card{
+        padding:25px;
+    }
+
+}
+
+</style>
 </head>
 <body>
 
@@ -11,9 +124,7 @@
 <aside class="sidebar">
     <h2>Instructor Panel</h2>
     <a href="instructor-dashboard.html">Dashboard</a>
-    <!-- <a href="instructor-courses.html">My Courses</a> -->
-    <!-- <a href="create-course.html">Create Course</a> -->
-    <!-- <a href="create-assignment.html">Assignments</a> -->
+                <a href="upload.html">Upload Video</a>
     <a href="students.html"> Add Students</a>
     <a href="attendance.html">Attendance</a>
     <a href="attendance-history.html">Attendance History</a>
@@ -22,17 +133,54 @@
 
 <main class="main-content">
 
-<h1>Create Assignment</h1>
+    <h1 class="page-title">
+        Create Assignment
+    </h1>
 
-<form id="assignmentForm">
-    <select id="courseSelect" required></select>
-    <input type="text" id="title" placeholder="Assignment Title" required>
-    <textarea id="description" placeholder="Description"></textarea>
-    <input type="date" id="dueDate" required>
+    <div class="assignment-card">
 
-    <button type="submit" id="btn">Create Assignment</button>
-    <p id="msg"></p>
-</form>
+        <form id="assignmentForm">
+
+            <label>Select Course</label>
+
+            <select id="courseSelect" required></select>
+
+            <label>Assignment Title</label>
+
+            <input
+                type="text"
+                id="title"
+                placeholder="Enter assignment title"
+                required
+            >
+
+            <label>Description</label>
+
+            <textarea
+                id="description"
+                placeholder="Enter assignment description"
+            ></textarea>
+
+            <label>Due Date</label>
+
+            <input
+                type="date"
+                id="dueDate"
+                required
+            >
+
+            <button
+                type="submit"
+                id="createBtn"
+            >
+                Create Assignment
+            </button>
+
+            <p id="msg"></p>
+
+        </form>
+
+    </div>
 
 </main>
 </div>
@@ -47,8 +195,7 @@ if (!token || user.role !== "instructor") {
 
 const select = document.getElementById("courseSelect");
 const msg = document.getElementById("msg");
-const btn = document.getElementById("btn");
-
+const btn = document.getElementById("createBtn");
 // 🔹 Load instructor courses
 async function loadCourses() {
     const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {

@@ -3,19 +3,119 @@
 <head>
     <title>Attendance History</title>
     <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+
+:root{
+    --primary:#22c55e;
+    --primary-dark:#16a34a;
+    --bg-light:#f0fdf4;
+    --white:#fff;
+    --text-dark:#1f2937;
+}
+
+body{
+    margin:0;
+    background:var(--bg-light);
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.main-content{
+    flex:1;
+    padding:40px;
+}
+
+.main-content h1{
+    color:var(--primary-dark);
+    margin-bottom:35px;
+}
+
+#historyContainer{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+.course-card{
+    background:white;
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.course-card h2{
+    color:var(--primary-dark);
+    margin-top:0;
+}
+
+.course-card hr{
+    margin:20px 0;
+    border:none;
+    border-top:1px solid #e5e7eb;
+}
+
+.attendance-record{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+    margin-bottom:12px;
+    background:#f9fafb;
+    border-radius:10px;
+    border-left:5px solid var(--primary);
+}
+
+.attendance-record p{
+    margin:0;
+}
+
+.empty-state{
+
+    background:white;
+    padding:50px;
+    text-align:center;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.empty-state h2{
+
+    color:var(--primary-dark);
+    margin-bottom:15px;
+
+}
+
+@media(max-width:768px){
+
+.main-content{
+
+padding:20px;
+
+}
+
+.attendance-record{
+
+flex-direction:column;
+align-items:flex-start;
+gap:8px;
+
+}
+
+}
+
+</style>
 </head>
 <body>
 
 <div class="dashboard">
 
     <!-- Sidebar -->
-    <aside class="sidebar">
+  <aside class="sidebar">
         <h2>Instructor Panel</h2>
-
         <a href="instructor-dashboard.html">Dashboard</a>
-        <a href="students.html">Students</a>
+        <a href="upload.html">Upload Video</a>
+                 <a href="students.html"> Add Students</a>
         <a href="attendance.html">Attendance</a>
-        <a href="attendance-history.html">Attendance History</a>
         <a href="instructor-assignments.html">Assignments</a>
         <a href="#" onclick="logout()">Logout</a>
     </aside>
@@ -55,7 +155,7 @@ async function loadHistory() {
             }
         );
 
-        const history = await res.json();
+const history = await res.json();
 
         container.innerHTML = "";
 
