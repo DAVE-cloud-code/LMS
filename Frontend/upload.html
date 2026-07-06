@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Class Video</title>
+    <link rel="stylesheet" href="/Frontend/css/dashboard.css">
+
+        <style>
+            :root {
+    --primary: #22c55e;
+    --primary-dark: #16a34a;
+    --bg-light: #f0fdf4;
+    --white: #ffffff;
+    --text-dark: #1f2937;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:var(--bg-light);
+}
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+.main-content{
+    flex:1;
+    padding:50px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.upload-card{
+    width:100%;
+    max-width:650px;
+    background:var(--white);
+    padding:35px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.upload-card h2{
+    color:var(--primary-dark);
+    text-align:center;
+    margin-bottom:30px;
+    font-size:30px;
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    color:var(--text-dark);
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+    width:100%;
+    padding:14px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    outline:none;
+    font-size:15px;
+    transition:.3s;
+}
+
+.form-group textarea{
+    resize:vertical;
+    min-height:130px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(34,197,94,.2);
+}
+
+input[type=file]{
+    padding:10px;
+}
+
+.upload-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    background:var(--primary);
+    color:white;
+    font-size:16px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.3s;
+    font-weight:bold;
+}
+
+.upload-btn:hover{
+    background:var(--primary-dark);
+}
+
+@media(max-width:768px){
+
+    .dashboard{
+        flex-direction:column;
+    }
+
+    .main-content{
+        padding:20px;
+    }
+
+    .upload-card{
+        padding:25px;
+    }
+
+}
+
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+
+          <aside class="sidebar">
+        <h2>Instructor Panel</h2>
+        <a href="instructor-dashboard.html">Dashboard</a>
+        <a href="upload.html">Upload Video</a>
+        <!-- <a href="create-course.html">Create Course</a> -->
+                 <a href="students.html"> Add Students</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="instructor-assignments.html">Assignments</a>
+        <a href="attendance-history.html">Attendance History</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </aside>
+
+<main class="main-content">
+
+    <div class="upload-card">
+
+        <h2>Upload Lecture Video</h2>
+
+        <form id="uploadForm">
+
+            <div class="form-group">
+
+                <label>Course</label>
+
+                <select id="course" required>
+
+                    <option value="">Select Course</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Lecture Title</label>
+
+                <input
+                    type="text"
+                    id="title"
+                    placeholder="Enter lecture title"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Description</label>
+
+                <textarea
+                    id="description"
+                    placeholder="Brief description of the lecture"
+                ></textarea>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Select Video</label>
+
+                <input
+                    type="file"
+                    id="video"
+                    accept="video/*"
+                    required
+                >
+
+            </div>
+
+            <button class="upload-btn">
+                Upload Lecture
+            </button>
+
+        </form>
+
+    </div>
+
+</main>
+<script>
+
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!token || !user || user.role !== "instructor") {
+    window.location.href = "login.html";
+}
+
+// Form Elements
+const form = document.getElementById("uploadForm");
+const courseSelect = document.getElementById("course");
+const title = document.getElementById("title");
+const description = document.getElementById("description");
+const video = document.getElementById("video");
+const uploadBtn = document.querySelector(".upload-btn");
+
+
+// Load Instructor Courses
+async function loadCourses() {
+
+    try {
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/courses",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error("Unable to load courses.");
+        }
+
+        const courses = await res.json();
+
+        // Show only courses owned by this instructor
+        const myCourses = courses.filter(course =>
+            course.instructor &&
+            course.instructor._id === user._id
+        );
+
+        courseSelect.innerHTML = `
+            <option value="">Select Course</option>
+        `;
+
+        myCourses.forEach(course => {
+
+            courseSelect.innerHTML += `
+                <option value="${course._id}">
+                    ${course.title}
+                </option>
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+        alert(error.message);
+
+    }
+
+}
+
+loadCourses();
+
+
+// Upload Lecture
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    if (!courseSelect.value) {
+        return alert("Please select a course.");
+    }
+
+    if (!video.files.length) {
+        return alert("Please choose a video.");
+    }
+
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "Uploading...";
+
+    const data = new FormData();
+
+    data.append("title", title.value);
+    data.append("description", description.value);
+    data.append("course", courseSelect.value);
+    data.append("video", video.files[0]);
+
+    try {
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/lectures/upload",
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: data
+            }
+        );
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            throw new Error(result.message || "Upload failed.");
+        }
+
+        alert("Lecture uploaded successfully!");
+
+        form.reset();
+
+    } catch (error) {
+
+        console.error(error);
+        alert(error.message);
+
+    } finally {
+
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "Upload Lecture";
+
+    }
+
+});
+
+
+// Logout
+function logout() {
+
+    localStorage.clear();
+
+    window.location.href = "login.html";
+
+}
+
+</script>    
+</body>
+</html>

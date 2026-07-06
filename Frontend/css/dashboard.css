@@ -164,7 +164,7 @@ input,select{
 
 }
 
-button{
+.adm{
 
     padding:12px;
     background:var(--primary);

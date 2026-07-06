@@ -12,6 +12,7 @@ const attendanceRoutes = require("./routes/attendance");
 const classSessionRoutes = require("./routes/classSession");
 const studentRoutes = require("./routes/student");
 const assign = require("./routes/user");
+const Lecture = require("./routes/lecture");
 
 dotenv.config();
 const app = express();
@@ -44,7 +45,7 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/class", classSessionRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/users", assign);
-
+app.use("/api/lectures", Lecture);
 
 // Error handler
 app.use((err, req, res, next) => {
