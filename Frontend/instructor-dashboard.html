@@ -40,10 +40,6 @@
 
 </div>
 
-        <h2>My Courses</h2>
-        <div class="card-grid" id="courseContainer"></div>
-    </main>
-
 </div>
 
 <script>
@@ -57,35 +53,6 @@ if (!token || user.role !== "instructor") {
 document.getElementById("welcomeText").textContent =
     `Welcome, ${user.fullname}`;
 
-const container = document.getElementById("courseContainer");
-
-// Load instructor courses
-async function loadCourses() {
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const courses = await res.json();
-
-        const myCourses = courses.filter(c => c.instructor._id === user._id);
-
-    container.innerHTML = "";
-
-    myCourses.forEach(course => {
-        const card = document.createElement("div");
-        card.className = "course-card";
-
-        card.innerHTML = `
-            <h3>${course.title}</h3>
-            <p>${course.category}</p>
-            <p>${course.description}</p>
-        `;
-
-        container.appendChild(card);
-    });
-}
-
-loadCourses();
 
 async function loadProfile() {
 

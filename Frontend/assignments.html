@@ -1,111 +1,217 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Assignments - MyLMS</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Assignments - MyLMS</title>
+
+<link rel="stylesheet" href="css/dashboard.css">
+
+<style>
+
+:root{
+    --primary:#22c55e;
+    --primary-dark:#16a34a;
+    --bg-light:#f0fdf4;
+    --white:#ffffff;
+    --text-dark:#1f2937;
+}
+
+.assignment-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:25px;
+    margin-top:30px;
+}
+
+.assignment-card{
+    background:var(--white);
+    border-radius:15px;
+    padding:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.assignment-card:hover{
+    transform:translateY(-6px);
+}
+
+.assignment-card h3{
+    color:var(--primary-dark);
+    margin-bottom:12px;
+}
+
+.assignment-card p{
+    color:#555;
+    line-height:1.6;
+    margin-bottom:10px;
+}
+
+.due-date{
+    color:#ef4444;
+    font-weight:600;
+}
+
+.submit-btn{
+    display:inline-block;
+    margin-top:15px;
+    padding:12px 20px;
+    background:var(--primary);
+    color:#fff;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.submit-btn:hover{
+    background:var(--primary-dark);
+}
+
+.empty-state{
+    background:white;
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+</style>
+
 </head>
 <body>
 
 <div class="dashboard">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h2>MyLMS</h2>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="courses.html">Courses</a>
-        <a href="assignments.html">Assignments</a>
-        <a href="student-attendance.html">Attendance</a>
- <a href="index.html" onclick="logout()">Logout</a>
-    </aside>
+<aside class="sidebar">
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <h1>My Assignments</h1>
+<h2>MyLMS</h2>
+
+<a href="dashboard.html">Dashboard</a>
+<a href="courses.html">Courses</a>
+<a href="assignments.html">Assignments</a>
+<a href="student-attendance.html">Attendance</a>
+<a href="#" onclick="logout()">Logout</a>
+
+</aside>
+
+
+<main class="main-content">
+
+<h1>Available Assignments</h1>
+
+<p>
+Complete and submit your assignments before their due dates.
+</p>
 
 <div class="assignment-grid" id="assignmentContainer"></div>
 
-    </main>
+</main>
+
 </div>
 
-
 <script>
+
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user"));
+
 const container = document.getElementById("assignmentContainer");
 
-// 🔐 Protect page
-if (!token || !user) {
+if(!token || !user || user.role !== "student"){
     window.location.href = "login.html";
 }
 
-// 🧠 Step 1: Get all courses
-async function loadAssignments() {
-    try {
-        const courseRes = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
-            headers: {
-                "Authorization": `Bearer ${token}`
+
+// ======================
+// Load Assignments
+// ======================
+
+async function loadAssignments(){
+
+    try{
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/assignments/all",
+            {
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
             }
-        });
-
-        const courses = await courseRes.json();
-
-        // 🧠 Filter only enrolled courses
-        const enrolledCourses = courses.filter(course =>
-            course.students.includes(user._id)
         );
 
-        container.innerHTML = "";
+        const assignments = await res.json();
 
-        if (enrolledCourses.length === 0) {
-            container.innerHTML = "<p>No enrolled lessons yet.</p>";
+        container.innerHTML="";
+
+        if(assignments.length===0){
+
+            container.innerHTML=`
+                <div class="empty-state">
+                    <h2>No Assignments Yet</h2>
+                    <p>Your instructor hasn't uploaded any assignments.</p>
+                </div>
+            `;
+
             return;
+
         }
 
-        // 🧠 Step 2: Fetch assignments per course
-        for (let course of enrolledCourses) {
+        assignments.forEach(assignment=>{
 
-            const res = await fetch(
-                `https://lms-back-7t0r.onrender.com/api/assignments/course/${course._id}`,
-                {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                }
-            );
+            container.innerHTML+=`
 
-            const assignments = await res.json();
+            <div class="assignment-card">
 
-            assignments.forEach(assignment => {
+                <h3>${assignment.title}</h3>
 
-                const card = document.createElement("div");
-                card.className = "assignment-card";
+                <p>${assignment.description}</p>
 
-                card.innerHTML = `
-                    <h3>${assignment.title}</h3>
-                    <p>Course: ${course.title}</p>
-                    <p>Due Date: ${new Date(assignment.dueDate).toDateString()}</p>
-                    <a href="submit-assignment.html?id=${assignment._id}" class="view-btn">
-                        View & Submit
-                    </a>
-                `;
+                <p class="due-date">
+                    Due:
+                    ${new Date(assignment.dueDate).toDateString()}
+                </p>
 
-                container.appendChild(card);
-            });
-        }
+                <a
+                    href="submit-assignment.html?id=${assignment._id}"
+                    class="submit-btn"
+                >
+                    Submit Assignment
+                </a>
 
-    } catch (error) {
-        container.innerHTML = "<p>Error loading assignments</p>";
-        console.log(error);
+            </div>
+
+            `;
+
+        });
+
     }
+
+    catch(error){
+
+        console.log(error);
+
+        container.innerHTML=`
+            <div class="empty-state">
+                Failed to load assignments.
+            </div>
+        `;
+
+    }
+
 }
 
 loadAssignments();
 
-function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
+function logout(){
+
+    localStorage.clear();
+
+    window.location.href="login.html";
+
 }
+
 </script>
+
 </body>
 </html>

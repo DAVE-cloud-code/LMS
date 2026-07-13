@@ -141,10 +141,6 @@ body{
 
         <form id="assignmentForm">
 
-            <label>Select Course</label>
-
-            <select id="courseSelect" required></select>
-
             <label>Assignment Title</label>
 
             <input
@@ -180,80 +176,217 @@ body{
 
         </form>
 
+        <h2 style="margin-top:40px;">My Assignments</h2>
+
+<div id="assignmentsContainer"></div>
+
     </div>
 
 </main>
 </div>
-
 <script>
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!token || user.role !== "instructor") {
+if (!token || !user || user.role !== "instructor") {
     window.location.href = "login.html";
 }
 
-const select = document.getElementById("courseSelect");
+const form = document.getElementById("assignmentForm");
 const msg = document.getElementById("msg");
 const btn = document.getElementById("createBtn");
-// 🔹 Load instructor courses
-async function loadCourses() {
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/courses", {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+const assignmentsContainer = document.getElementById("assignmentsContainer");
 
-    const courses = await res.json();
+// =======================
+// Load My Assignments
+// =======================
 
-    const myCourses = courses.filter(c => c.instructor._id === user._id);
+async function loadAssignments() {
 
-    myCourses.forEach(course => {
-        const option = document.createElement("option");
-        option.value = course._id;
-        option.textContent = course.title;
-        select.appendChild(option);
-    });
-}
+    try {
 
-loadCourses();
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/assignments/my-assignments",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
 
-// 🔹 Submit assignment
-document.getElementById("assignmentForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+        const assignments = await res.json();
 
-    btn.textContent = "Creating...";
-    btn.disabled = true;
+        assignmentsContainer.innerHTML = "";
 
-    const res = await fetch("https://lms-back-7t0r.onrender.com/api/assignments/create", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            title: title.value,
-            description: description.value,
-            dueDate: dueDate.value,
-            courseId: select.value
-        })
-    });
+        if (assignments.length === 0) {
 
-    const data = await res.json();
+            assignmentsContainer.innerHTML = `
+                <p>No assignments created yet.</p>
+            `;
 
-    if (res.ok) {
-        msg.style.color = "green";
-        msg.textContent = "Assignment created 🎉";
-    } else {
-        msg.style.color = "red";
-        msg.textContent = data.message;
+            return;
+        }
+
+        assignments.forEach(assignment => {
+
+            assignmentsContainer.innerHTML += `
+
+                <div class="course-card">
+
+                    <h3>${assignment.title}</h3>
+
+                    <p>${assignment.description}</p>
+
+                    <p>
+                        <strong>Due Date:</strong>
+                        ${new Date(assignment.dueDate).toLocaleDateString()}
+                    </p>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteAssignment('${assignment._id}')"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        assignmentsContainer.innerHTML =
+            "<p>Failed to load assignments.</p>";
+
     }
 
-    btn.textContent = "Create Assignment";
+}
+
+loadAssignments();
+
+
+// =======================
+// Create Assignment
+// =======================
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    btn.disabled = true;
+    btn.textContent = "Creating...";
+
+    try {
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/assignments/create",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+
+                body: JSON.stringify({
+
+                    title: title.value,
+                    description: description.value,
+                    dueDate: dueDate.value
+
+                })
+
+            }
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+
+            msg.style.color = "green";
+            msg.textContent = "Assignment created successfully 🎉";
+
+            form.reset();
+
+            loadAssignments();
+
+        } else {
+
+            msg.style.color = "red";
+            msg.textContent = data.message;
+
+        }
+
+    } catch (error) {
+
+        msg.style.color = "red";
+        msg.textContent = "Something went wrong.";
+
+    }
+
     btn.disabled = false;
+    btn.textContent = "Create Assignment";
+
 });
 
+
+// =======================
+// Delete Assignment
+// =======================
+
+async function deleteAssignment(id) {
+
+    const confirmDelete = confirm(
+        "Are you sure you want to delete this assignment?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+        const res = await fetch(
+            `https://lms-back-7t0r.onrender.com/api/assignments/${id}`,
+            {
+
+                method: "DELETE",
+
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+
+            }
+        );
+
+        const data = await res.json();
+
+        alert(data.message);
+
+        loadAssignments();
+
+    } catch (error) {
+
+        alert("Failed to delete assignment.");
+
+    }
+
+}
+
+
+// =======================
+// Logout
+// =======================
+
 function logout() {
+
     localStorage.clear();
+
     window.location.href = "login.html";
+
 }
 </script>
 
