@@ -1,84 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Submit Assignment - MyLMS</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-        <link rel="shortcut icon" href="WhatsApp Image 2026-03-07 at 11.08.01.jpeg" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Assignment - MyLMS</title>
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="shortcut icon" href="WhatsApp Image 2026-03-07 at 11.08.01.jpeg" type="image/x-icon">
+<style>
+.assignment-details{background:#fff;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.08);max-width:800px;margin-top:25px;}
+.file-box{border:2px dashed #d1d5db;padding:25px;border-radius:12px;margin:20px 0;background:#f9fafb;}
+.file-box input{width:100%;}
+.submit-btn{padding:12px 20px;background:#22c55e;color:#fff;border:0;border-radius:8px;font-weight:600;cursor:pointer;}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;}
+.message{margin-top:15px;font-weight:600;}
+.result-box{margin-top:25px;padding:20px;border-radius:12px;background:#f0fdf4;border-left:5px solid #22c55e;}
+.download-btn{display:inline-block;margin-top:10px;padding:10px 15px;background:#16a34a;color:#fff;text-decoration:none;border-radius:7px;}
+</style>
 </head>
 <body>
-
 <div class="dashboard">
-
-    <aside class="sidebar">
-        <h2>MyLMS</h2>
-        <a href="dashboard.html">Dashboard</a>
-        <!-- <a href="courses.html">Courses</a> -->
-        <a href="assignments.html">Assignments</a>
-        <a href="index.html">Logout</a>
-    </aside>
-
-    <main class="main-content">
-       <h1 id="assignmentTitle"></h1>
-
+<aside class="sidebar">
+<h2>MyLMS</h2>
+<a href="dashboard.html">Dashboard</a>
+<a href="assignments.html">Assignments</a>
+<a href="index.html" onclick="logout()">Logout</a>
+</aside>
+<main class="main-content">
+<h1 id="assignmentTitle">Loading assignment...</h1>
 <div class="assignment-details">
-    <p><strong>Description:</strong></p>
-    <p id="assignmentDescription"></p>
-
-    <p><strong>Due Date:</strong> <span id="assignmentDueDate"></span></p>
-
-    <hr>
-
-    <h3>Submit Your Work</h3>
-
-    <form id="submitForm">
-        <textarea id="submissionContent" placeholder="Write your submission..." required></textarea>
-        <button type="submit" class="submit-btn" id="submitBtn">Submit Assignment</button>
-        <p id="submitMessage"></p>
-    </form>
+<p><strong>Description:</strong></p>
+<p id="assignmentDescription"></p>
+<p><strong>Due Date:</strong> <span id="assignmentDueDate"></span></p>
+<div id="submissionArea"></div>
 </div>
-    </main>
-
+</main>
 </div>
-
-
 <script>
+const API = "https://lms-back-7t0r.onrender.com/api";
 const token = localStorage.getItem("token");
-const params = new URLSearchParams(window.location.search);
-const assignmentId = params.get("id");
+const user = JSON.parse(localStorage.getItem("user") || "null");
+const assignmentId = new URLSearchParams(window.location.search).get("id");
 
-const titleEl = document.querySelector("h1");
-const descEl = document.querySelector(".assignment-details p:nth-of-type(2)");
-const dueEl = document.querySelector(".assignment-details p:nth-of-type(3)");
+if (!token || !user || user.role !== "student") {
+    window.location.href = "login.html";
+}
 
-async function loadAssignment() {
+const titleEl = document.getElementById("assignmentTitle");
+const descEl = document.getElementById("assignmentDescription");
+const dueEl = document.getElementById("assignmentDueDate");
+const area = document.getElementById("submissionArea");
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+async function loadPage() {
+    if (!assignmentId) {
+        area.innerHTML = `<p class="message">No assignment was selected.</p>`;
+        return;
+    }
+
     try {
-        const res = await fetch(
-            `https://lms-back-7t0r.onrender.com/api/assignments/${assignmentId}`,
-            {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            }
-        );
+        const [assignmentRes, submissionsRes] = await Promise.all([
+            fetch(`${API}/assignments/${encodeURIComponent(assignmentId)}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }),
+            fetch(`${API}/submissions/my-submissions`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        ]);
 
-        const assignment = await res.json();
+        const assignment = await assignmentRes.json();
+        const submissions = await submissionsRes.json();
+
+        if (!assignmentRes.ok) throw new Error(assignment.message || "Assignment not found");
+        if (!submissionsRes.ok) throw new Error(submissions.message || "Could not load submission status");
 
         titleEl.textContent = assignment.title;
         descEl.textContent = assignment.description;
-        dueEl.innerHTML = `<strong>Due Date:</strong> ${new Date(assignment.dueDate).toDateString()}`;
+        dueEl.textContent = new Date(assignment.dueDate).toLocaleString();
 
+        const submission = submissions.find(item => item.assignment?._id === assignmentId);
+
+        if (submission) {
+            let result = "";
+
+            if (submission.status === "graded") {
+                result = `
+                    <div class="result-box">
+                        <h3>✓ Assignment Graded</h3>
+                        <p><strong>Grade:</strong> ${submission.grade}/100</p>
+                        <p><strong>Feedback:</strong> ${escapeHtml(submission.feedback || "No feedback provided.")}</p>
+                        <a class="download-btn" href="${submission.fileUrl}" target="_blank" rel="noopener">View Submitted File</a>
+                    </div>
+                `;
+            } else {
+                result = `
+                    <div class="result-box">
+                        <h3>✓ Assignment Submitted</h3>
+                        <p>Your assignment has been submitted and is waiting to be graded.</p>
+                        <p><strong>File:</strong> ${escapeHtml(submission.fileName)}</p>
+                        <a class="download-btn" href="${submission.fileUrl}" target="_blank" rel="noopener">View Submitted File</a>
+                    </div>
+                `;
+            }
+
+            area.innerHTML = result;
+            return;
+        }
+
+        const deadlinePassed = new Date() > new Date(assignment.dueDate);
+
+        if (deadlinePassed) {
+            area.innerHTML = `<p class="message" style="color:#dc2626;">The deadline for this assignment has passed. Submissions are closed.</p>`;
+            return;
+        }
+
+        area.innerHTML = `
+            <hr>
+            <h3>Submit Your Work</h3>
+            <p>Accepted files: PDF, ZIP, DOC, DOCX or TXT. Maximum size: 10MB.</p>
+            <form id="submitForm">
+                <div class="file-box">
+                    <input type="file" id="assignmentFile" name="assignmentFile" accept=".pdf,.zip,.doc,.docx,.txt" required>
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Assignment</button>
+                <p id="submitMessage" class="message"></p>
+            </form>
+        `;
+
+        document.getElementById("submitForm").addEventListener("submit", submitAssignment);
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        area.innerHTML = `<p class="message" style="color:#dc2626;">${escapeHtml(error.message)}</p>`;
     }
 }
 
-loadAssignment();
+async function submitAssignment(event) {
+    event.preventDefault();
+
+    const fileInput = document.getElementById("assignmentFile");
+    const button = document.getElementById("submitBtn");
+    const message = document.getElementById("submitMessage");
+
+    if (!fileInput.files.length) {
+        message.style.color = "#dc2626";
+        message.textContent = "Please select a file.";
+        return;
+    }
+
+    const file = fileInput.files[0];
+
+    if (file.size > 10 * 1024 * 1024) {
+        message.style.color = "#dc2626";
+        message.textContent = "File is too large. Maximum size is 10MB.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("assignmentFile", file);
+
+    button.disabled = true;
+    button.textContent = "Uploading...";
+    message.textContent = "";
+
+    try {
+        const res = await fetch(`${API}/submissions/submit/${encodeURIComponent(assignmentId)}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Submission failed");
+        }
+
+        message.style.color = "#16a34a";
+        message.textContent = "Assignment submitted successfully ✓";
+
+        setTimeout(() => loadPage(), 600);
+    } catch (error) {
+        console.error(error);
+        message.style.color = "#dc2626";
+        message.textContent = error.message;
+        button.disabled = false;
+        button.textContent = "Submit Assignment";
+    }
+}
 
 function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
+    localStorage.clear();
 }
+
+loadPage();
 </script>
 </body>
 </html>

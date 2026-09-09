@@ -1,57 +1,146 @@
 const Submission = require("../models/submission");
+const Assignment = require("../models/assignment");
 
+// Submit Assignment
 exports.submitAssignment = async (req, res) => {
+    try {
+        const assignment = await Assignment.findById(req.params.assignmentId);
 
-  try {
+        if (!assignment) {
+            return res.status(404).json({ message: "Assignment not found" });
+        }
 
-    const submission = await Submission.create({
+        if (new Date() > new Date(assignment.dueDate)) {
+            return res.status(400).json({
+                message: "The deadline for this assignment has passed"
+            });
+        }
 
-      assignment: req.body.assignmentId,
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Please upload your assignment file"
+            });
+        }
 
-      student: req.user.id,
+        const existingSubmission = await Submission.findOne({
+            assignment: assignment._id,
+            student: req.user.id
+        });
 
-      fileUrl: req.body.fileUrl
+        if (existingSubmission) {
+            return res.status(400).json({
+                message: "You have already submitted this assignment"
+            });
+        }
 
-    });
+        const submission = await Submission.create({
+            assignment: assignment._id,
+            student: req.user.id,
+            fileUrl: req.file.path,
+            fileName: req.file.originalname,
+            submittedAt: new Date(),
+            status: "submitted"
+        });
 
-    res.status(201).json(submission);
+        res.status(201).json({
+            message: "Assignment submitted successfully",
+            submission
+        });
+    } catch (error) {
+        console.error(error);
 
-  } catch (error) {
+        if (error.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+                message: "File is too large. Maximum size is 10MB"
+            });
+        }
 
-    res.status(500).json({
-      message: "Submission failed",
-      error: error.message
-    });
-
-  }
-
+        res.status(500).json({ message: error.message });
+    }
 };
 
+// Student: Get All My Submissions
+exports.getMySubmissions = async (req, res) => {
+    try {
+        const submissions = await Submission.find({
+            student: req.user.id
+        })
+            .populate({
+                path: "assignment",
+                populate: {
+                    path: "instructor",
+                    select: "fullname"
+                }
+            })
+            .sort({ createdAt: -1 });
+
+        res.json(submissions);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Student: Get One Own Submission
+exports.getMySubmission = async (req, res) => {
+    try {
+        const submission = await Submission.findOne({
+            _id: req.params.submissionId,
+            student: req.user.id
+        }).populate("assignment", "title description dueDate");
+
+        if (!submission) {
+            return res.status(404).json({ message: "Submission not found" });
+        }
+
+        res.json(submission);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Instructor: Grade Submission
 exports.gradeSubmission = async (req, res) => {
+    try {
+        const { grade, feedback } = req.body;
+        const numericGrade = Number(grade);
 
-  try {
+        if (!Number.isFinite(numericGrade) || numericGrade < 0 || numericGrade > 100) {
+            return res.status(400).json({
+                message: "Grade must be a number between 0 and 100"
+            });
+        }
 
-    const submission = await Submission.findByIdAndUpdate(
+        const submission = await Submission.findById(req.params.submissionId)
+            .populate("assignment");
 
-      req.params.submissionId,
+        if (!submission) {
+            return res.status(404).json({ message: "Submission not found" });
+        }
 
-      {
-        grade: req.body.grade,
-        feedback: req.body.feedback
-      },
+        if (
+            submission.assignment.instructor.toString() !==
+            req.user.id.toString()
+        ) {
+            return res.status(403).json({
+                message: "You are not authorized to grade this submission"
+            });
+        }
 
-      { new: true }
+        submission.grade = numericGrade;
+        submission.feedback = typeof feedback === "string" ? feedback.trim() : "";
+        submission.status = "graded";
+        submission.gradedAt = new Date();
 
-    );
+        await submission.save();
 
-    res.json(submission);
-
-  } catch (error) {
-
-    res.status(500).json({
-      message: error.message
-    });
-
-  }
-
+        res.json({
+            message: "Assignment graded successfully",
+            submission
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
 };

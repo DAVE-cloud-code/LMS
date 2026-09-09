@@ -1,394 +1,260 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create Assignment</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-
-    <style>
-
-:root{
-    --primary:#22c55e;
-    --primary-dark:#16a34a;
-    --bg-light:#f0fdf4;
-    --white:#ffffff;
-    --text-dark:#1f2937;
-}
-
-body{
-    margin:0;
-    background:var(--bg-light);
-    font-family:Arial, Helvetica, sans-serif;
-}
-
-.main-content{
-    flex:1;
-    padding:40px;
-}
-
-.page-title{
-    color:var(--primary-dark);
-    font-size:32px;
-    margin-bottom:30px;
-}
-
-.assignment-card{
-    max-width:700px;
-    background:var(--white);
-    padding:35px;
-    border-radius:16px;
-    box-shadow:0 8px 25px rgba(0,0,0,.08);
-}
-
-.assignment-card label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:600;
-    color:var(--text-dark);
-}
-
-.assignment-card input,
-.assignment-card textarea,
-.assignment-card select{
-    width:100%;
-    padding:14px;
-    margin-bottom:20px;
-    border:1px solid #d1d5db;
-    border-radius:10px;
-    font-size:15px;
-    outline:none;
-    transition:.3s;
-    background:#fff;
-}
-
-.assignment-card textarea{
-    resize:vertical;
-    min-height:140px;
-}
-
-.assignment-card input:focus,
-.assignment-card textarea:focus,
-.assignment-card select:focus{
-    border-color:var(--primary);
-    box-shadow:0 0 0 3px rgba(34,197,94,.2);
-}
-
-#createBtn{
-    width:100%;
-    padding:15px;
-    background:var(--primary);
-    color:white;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:bold;
-    transition:.3s;
-}
-
-#createBtn:hover{
-    background:var(--primary-dark);
-    transform:translateY(-2px);
-    box-shadow:0 8px 18px rgba(34,197,94,.25);
-}
-
-#createBtn:disabled{
-    opacity:.7;
-    cursor:not-allowed;
-}
-
-#msg{
-    margin-top:20px;
-    text-align:center;
-    font-weight:bold;
-    font-size:16px;
-}
-
-@media(max-width:768px){
-
-    .main-content{
-        padding:20px;
-    }
-
-    .assignment-card{
-        padding:25px;
-    }
-
-}
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor Assignments</title>
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+:root{--primary:#22c55e;--primary-dark:#16a34a;--bg-light:#f0fdf4;--white:#fff;--text-dark:#1f2937;}
+body{margin:0;background:var(--bg-light);font-family:Arial,Helvetica,sans-serif;}
+.main-content{flex:1;padding:40px;}
+.page-title{color:var(--primary-dark);font-size:32px;margin-bottom:30px;}
+.assignment-card{max-width:900px;background:var(--white);padding:30px;margin-bottom:25px;border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.08);}
+.assignment-card h3{margin-top:0;color:var(--primary-dark);}
+.assignment-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;}
+button{border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font-weight:600;}
+.view-btn{background:#16a34a;color:white;}
+.delete-btn{background:#fee2e2;color:#b91c1c;}
+.grade-btn{background:#22c55e;color:#fff;}
+.msg{margin-top:15px;font-weight:600;}
+.submissions{margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;}
+.submission-card{border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-top:12px;background:#fafafa;}
+.submission-card h4{margin:0 0 6px;}
+.submission-card a{color:#15803d;font-weight:600;}
+.status{display:inline-block;padding:5px 9px;border-radius:15px;font-size:12px;font-weight:700;}
+.status.submitted{background:#dbeafe;color:#1d4ed8;}
+.status.graded{background:#dcfce7;color:#166534;}
+.grade-form{display:grid;grid-template-columns:120px 1fr auto;gap:10px;margin-top:15px;}
+.grade-form input,.grade-form textarea{border:1px solid #d1d5db;border-radius:8px;padding:10px;font:inherit;}
+.grade-form textarea{min-height:70px;resize:vertical;}
+@media(max-width:768px){.main-content{padding:20px;}.grade-form{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-
 <div class="dashboard">
-
 <aside class="sidebar">
-    <h2>Instructor Panel</h2>
-    <a href="instructor-dashboard.html">Dashboard</a>
-                <a href="upload.html">Upload Video</a>
-    <a href="students.html"> Add Students</a>
-    <a href="attendance.html">Attendance</a>
-    <a href="attendance-history.html">Attendance History</a>
-    <a href="#" onclick="logout()">Logout</a>
+<h2>Instructor Panel</h2>
+<a href="instructor-dashboard.html">Dashboard</a>
+<a href="upload.html">Upload Video</a>
+<a href="students.html">Add Students</a>
+<a href="attendance.html">Attendance</a>
+<a href="attendance-history.html">Attendance History</a>
+<a href="#" onclick="logout()">Logout</a>
 </aside>
-
 <main class="main-content">
-
-    <h1 class="page-title">
-        Create Assignment
-    </h1>
-
-    <div class="assignment-card">
-
-        <form id="assignmentForm">
-
-            <label>Assignment Title</label>
-
-            <input
-                type="text"
-                id="title"
-                placeholder="Enter assignment title"
-                required
-            >
-
-            <label>Description</label>
-
-            <textarea
-                id="description"
-                placeholder="Enter assignment description"
-            ></textarea>
-
-            <label>Due Date</label>
-
-            <input
-                type="date"
-                id="dueDate"
-                required
-            >
-
-            <button
-                type="submit"
-                id="createBtn"
-            >
-                Create Assignment
-            </button>
-
-            <p id="msg"></p>
-
-        </form>
-
-        <h2 style="margin-top:40px;">My Assignments</h2>
-
+<h1 class="page-title">Create Assignment</h1>
+<div class="assignment-card">
+<form id="assignmentForm">
+<label>Assignment Title</label>
+<input type="text" id="title" placeholder="Enter assignment title" required style="width:100%;padding:12px;margin:8px 0 18px;box-sizing:border-box;">
+<label>Description</label>
+<textarea id="description" placeholder="Enter assignment description" required style="width:100%;padding:12px;margin:8px 0 18px;box-sizing:border-box;min-height:120px;"></textarea>
+<label>Due Date</label>
+<input type="datetime-local" id="dueDate" required style="width:100%;padding:12px;margin:8px 0 18px;box-sizing:border-box;">
+<button type="submit" class="grade-btn" id="createBtn" style="width:100%;">Create Assignment</button>
+<p id="msg" class="msg"></p>
+</form>
+</div>
+<h2>My Assignments</h2>
 <div id="assignmentsContainer"></div>
-
-    </div>
-
 </main>
 </div>
 <script>
+const API = "https://lms-back-7t0r.onrender.com/api";
 const token = localStorage.getItem("token");
-const user = JSON.parse(localStorage.getItem("user"));
-
-if (!token || !user || user.role !== "instructor") {
-    window.location.href = "login.html";
-}
-
+const user = JSON.parse(localStorage.getItem("user") || "null");
 const form = document.getElementById("assignmentForm");
 const msg = document.getElementById("msg");
 const btn = document.getElementById("createBtn");
 const assignmentsContainer = document.getElementById("assignmentsContainer");
 
-// =======================
-// Load My Assignments
-// =======================
+if (!token || !user || !["instructor", "admin"].includes(user.role)) {
+    window.location.href = "login.html";
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
 
 async function loadAssignments() {
-
     try {
-
-        const res = await fetch(
-            "https://lms-back-7t0r.onrender.com/api/assignments/my-assignments",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        );
-
+        const res = await fetch(`${API}/assignments/my-assignments`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         const assignments = await res.json();
+        if (!res.ok) throw new Error(assignments.message || "Failed to load assignments");
 
         assignmentsContainer.innerHTML = "";
 
-        if (assignments.length === 0) {
-
-            assignmentsContainer.innerHTML = `
-                <p>No assignments created yet.</p>
-            `;
-
+        if (!assignments.length) {
+            assignmentsContainer.innerHTML = "<p>No assignments created yet.</p>";
             return;
         }
 
         assignments.forEach(assignment => {
-
             assignmentsContainer.innerHTML += `
-
-                <div class="course-card">
-
-                    <h3>${assignment.title}</h3>
-
-                    <p>${assignment.description}</p>
-
-                    <p>
-                        <strong>Due Date:</strong>
-                        ${new Date(assignment.dueDate).toLocaleDateString()}
-                    </p>
-
-                    <button
-                        class="delete-btn"
-                        onclick="deleteAssignment('${assignment._id}')"
-                    >
-                        Delete
-                    </button>
-
+                <div class="assignment-card">
+                    <h3>${escapeHtml(assignment.title)}</h3>
+                    <p>${escapeHtml(assignment.description)}</p>
+                    <p><strong>Due Date:</strong> ${new Date(assignment.dueDate).toLocaleString()}</p>
+                    <div class="assignment-actions">
+                        <button class="view-btn" onclick="viewSubmissions('${assignment._id}', this)">View Submissions</button>
+                        <button class="delete-btn" onclick="deleteAssignment('${assignment._id}')">Delete</button>
+                    </div>
+                    <div class="submissions" id="submissions-${assignment._id}" hidden></div>
                 </div>
-
             `;
+        });
+    } catch (error) {
+        console.error(error);
+        assignmentsContainer.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
+    }
+}
 
+form.addEventListener("submit", async event => {
+    event.preventDefault();
+    btn.disabled = true;
+    btn.textContent = "Creating...";
+    msg.textContent = "";
+
+    try {
+        const res = await fetch(`${API}/assignments/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                dueDate: document.getElementById("dueDate").value
+            })
         });
 
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to create assignment");
+
+        msg.style.color = "#16a34a";
+        msg.textContent = "Assignment created successfully ✓";
+        form.reset();
+        loadAssignments();
     } catch (error) {
+        msg.style.color = "#dc2626";
+        msg.textContent = error.message;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Create Assignment";
+    }
+});
 
-        console.log(error);
-
-        assignmentsContainer.innerHTML =
-            "<p>Failed to load assignments.</p>";
-
+async function viewSubmissions(id, button) {
+    const box = document.getElementById(`submissions-${id}`);
+    if (!box.hidden) {
+        box.hidden = true;
+        button.textContent = "View Submissions";
+        return;
     }
 
+    button.disabled = true;
+    button.textContent = "Loading...";
+
+    try {
+        const res = await fetch(`${API}/assignments/${id}/submissions`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load submissions");
+
+        if (!data.submissions.length) {
+            box.innerHTML = "<p>No students have submitted this assignment yet.</p>";
+        } else {
+            box.innerHTML = data.submissions.map(submission => `
+                <div class="submission-card">
+                    <h4>${escapeHtml(submission.student?.fullname || "Unknown Student")}</h4>
+                    <p>${escapeHtml(submission.student?.email || "")}</p>
+                    <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                    <p><strong>File:</strong> <a href="${submission.fileUrl}" target="_blank" rel="noopener">${escapeHtml(submission.fileName)}</a></p>
+                    <p><span class="status ${submission.status}">${submission.status === "graded" ? "✓ Graded" : "Submitted"}</span></p>
+                    <form class="grade-form" onsubmit="gradeSubmission(event, '${submission._id}', '${id}')">
+                        <input type="number" name="grade" min="0" max="100" step="1" value="${submission.grade ?? ""}" placeholder="Grade /100" required>
+                        <textarea name="feedback" placeholder="Feedback for student">${escapeHtml(submission.feedback || "")}</textarea>
+                        <button type="submit" class="grade-btn">${submission.status === "graded" ? "Update Grade" : "Grade Submission"}</button>
+                    </form>
+                </div>
+            `).join("");
+        }
+
+        box.hidden = false;
+        button.textContent = "Hide Submissions";
+    } catch (error) {
+        box.innerHTML = `<p style="color:#dc2626;">${escapeHtml(error.message)}</p>`;
+        box.hidden = false;
+        button.textContent = "View Submissions";
+    } finally {
+        button.disabled = false;
+    }
+}
+
+async function gradeSubmission(event, submissionId, assignmentId) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector("button");
+    const formData = new FormData(form);
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+        const res = await fetch(`${API}/submissions/grade/${submissionId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                grade: formData.get("grade"),
+                feedback: formData.get("feedback")
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to grade submission");
+
+        button.textContent = "Saved ✓";
+        button.disabled = false;
+        await viewSubmissions(assignmentId, document.querySelector(`[onclick*="${assignmentId}"]`));
+    } catch (error) {
+        alert(error.message);
+        button.disabled = false;
+        button.textContent = "Grade Submission";
+    }
+}
+
+async function deleteAssignment(id) {
+    if (!confirm("Are you sure you want to delete this assignment? All submissions for it will also be deleted.")) return;
+
+    try {
+        const res = await fetch(`${API}/assignments/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to delete assignment");
+        loadAssignments();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
 }
 
 loadAssignments();
-
-
-// =======================
-// Create Assignment
-// =======================
-
-form.addEventListener("submit", async (e) => {
-
-    e.preventDefault();
-
-    btn.disabled = true;
-    btn.textContent = "Creating...";
-
-    try {
-
-        const res = await fetch(
-            "https://lms-back-7t0r.onrender.com/api/assignments/create",
-            {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-
-                body: JSON.stringify({
-
-                    title: title.value,
-                    description: description.value,
-                    dueDate: dueDate.value
-
-                })
-
-            }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-
-            msg.style.color = "green";
-            msg.textContent = "Assignment created successfully 🎉";
-
-            form.reset();
-
-            loadAssignments();
-
-        } else {
-
-            msg.style.color = "red";
-            msg.textContent = data.message;
-
-        }
-
-    } catch (error) {
-
-        msg.style.color = "red";
-        msg.textContent = "Something went wrong.";
-
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Create Assignment";
-
-});
-
-
-// =======================
-// Delete Assignment
-// =======================
-
-async function deleteAssignment(id) {
-
-    const confirmDelete = confirm(
-        "Are you sure you want to delete this assignment?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-
-        const res = await fetch(
-            `https://lms-back-7t0r.onrender.com/api/assignments/${id}`,
-            {
-
-                method: "DELETE",
-
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-
-            }
-        );
-
-        const data = await res.json();
-
-        alert(data.message);
-
-        loadAssignments();
-
-    } catch (error) {
-
-        alert("Failed to delete assignment.");
-
-    }
-
-}
-
-
-// =======================
-// Logout
-// =======================
-
-function logout() {
-
-    localStorage.clear();
-
-    window.location.href = "login.html";
-
-}
 </script>
-
 </body>
 </html>

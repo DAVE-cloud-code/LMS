@@ -8,18 +8,35 @@ const authorizeRoles = require("../middlewares/roleMiddleware");
 
 const submissionController = require("../controllers/submissionController");
 
+
+
 router.post(
-  "/submit",
-  auth,
-  authorizeRoles("student"),
-  submissionController.submitAssignment
+    "/submit/:assignmentId",
+    auth,
+    authorizeRoles("student"),
+    uploadAssignment.single("assignmentFile"),
+    submissionController.submitAssignment
 );
 
-router.put(
-  "/grade/:submissionId",
-  auth,
-  authorizeRoles("instructor"),
-  submissionController.gradeSubmission
+router.get(
+    "/my-submissions",
+    auth,
+    authorizeRoles("student"),
+    submissionController.getMySubmissions
+);
+
+router.get(
+    "/:submissionId",
+    auth,
+    authorizeRoles("student"),
+    submissionController.getMySubmission
+);
+
+router.patch(
+    "/grade/:submissionId",
+    auth,
+    authorizeRoles("instructor", "admin"),
+    submissionController.gradeSubmission
 );
 
 module.exports = router;

@@ -8,44 +8,47 @@ const authorizeRoles = require("../middlewares/roleMiddleware");
 const assignmentController = require("../controllers/assignmentController");
 
 
-// ==============================
-// Instructor Routes
-// ==============================
 
-// Create Assignment
 router.post(
     "/create",
     auth,
-    authorizeRoles("instructor"),
+    authorizeRoles("instructor", "admin"),
     assignmentController.createAssignment
 );
 
-// Get Logged-in Instructor's Assignments
-router.get(
-    "/my-assignments",
-    auth,
-    authorizeRoles("instructor"),
-    assignmentController.getMyAssignments
-);
-
-// Delete Assignment
-router.delete(
-    "/:id",
-    auth,
-    authorizeRoles("instructor"),
-    assignmentController.deleteAssignment
-);
-
-
-// ==============================
-// Student Route
-// ==============================
-
-// Get All Available Assignments
 router.get(
     "/all",
     auth,
+    authorizeRoles("student"),
     assignmentController.getAssignments
 );
 
+router.get(
+    "/my-assignments",
+    auth,
+    authorizeRoles("instructor", "admin"),
+    assignmentController.getMyAssignments
+);
+
+// Must be before /:id so the submissions route is matched correctly.
+router.get(
+    "/:assignmentId/submissions",
+    auth,
+    authorizeRoles("instructor", "admin"),
+    assignmentController.getAssignmentSubmissions
+);
+
+router.get(
+    "/:id",
+    auth,
+    authorizeRoles("student"),
+    assignmentController.getAssignment
+);
+
+router.delete(
+    "/:id",
+    auth,
+    authorizeRoles("instructor", "admin"),
+    assignmentController.deleteAssignment
+);
 module.exports = router;
