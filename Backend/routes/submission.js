@@ -5,6 +5,7 @@ const router = express.Router();
 const auth = require("../middlewares/authMiddleware");
 
 const authorizeRoles = require("../middlewares/roleMiddleware");
+const uploadAssignment = require("../middlewares/uploadAssignments");
 
 const submissionController = require("../controllers/submissionController");
 
