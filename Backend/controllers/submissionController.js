@@ -4,10 +4,17 @@ const Assignment = require("../models/assignment");
 // Submit Assignment
 exports.submitAssignment = async (req, res) => {
     try {
+        console.log("===== SUBMISSION START =====");
+        console.log("Assignment ID:", req.params.assignmentId);
+        console.log("User:", req.user);
+        console.log("File:", req.file);
+
         const assignment = await Assignment.findById(req.params.assignmentId);
 
         if (!assignment) {
-            return res.status(404).json({ message: "Assignment not found" });
+            return res.status(404).json({
+                message: "Assignment not found"
+            });
         }
 
         if (new Date() > new Date(assignment.dueDate)) {
@@ -17,10 +24,15 @@ exports.submitAssignment = async (req, res) => {
         }
 
         if (!req.file) {
+            console.log("NO FILE RECEIVED");
+
             return res.status(400).json({
                 message: "Please upload your assignment file"
             });
         }
+
+        console.log("Uploaded file URL:", req.file.path);
+        console.log("Uploaded file name:", req.file.originalname);
 
         const existingSubmission = await Submission.findOne({
             assignment: assignment._id,
@@ -42,12 +54,21 @@ exports.submitAssignment = async (req, res) => {
             status: "submitted"
         });
 
-        res.status(201).json({
+        console.log("SUBMISSION SAVED:", submission._id);
+        console.log("===== SUBMISSION SUCCESS =====");
+
+        return res.status(201).json({
             message: "Assignment submitted successfully",
             submission
         });
+
     } catch (error) {
-        console.error(error);
+        console.error("===== SUBMISSION ERROR =====");
+        console.error("Error name:", error.name);
+        console.error("Error message:", error.message);
+        console.error("Error code:", error.code);
+        console.error("Full error:", error);
+        console.error("Stack:", error.stack);
 
         if (error.code === "LIMIT_FILE_SIZE") {
             return res.status(400).json({
@@ -55,7 +76,9 @@ exports.submitAssignment = async (req, res) => {
             });
         }
 
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({
+            message: error.message || "Something went wrong"
+        });
     }
 };
 
