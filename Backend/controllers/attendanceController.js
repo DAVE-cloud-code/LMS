@@ -1,13 +1,12 @@
 const Attendance = require("../models/attendance");
-const Course = require("../models/course");
 
-// ✅ Mark attendance
+// Mark attendance
 exports.markAttendance = async (req, res) => {
   try {
-    const { courseId, records } = req.body;
+    const { records } = req.body;
 
     const attendance = await Attendance.create({
-      course: courseId,
+      instructor: req.user.id,
       date: new Date(),
       records
     });
@@ -15,33 +14,8 @@ exports.markAttendance = async (req, res) => {
     res.status(201).json(attendance);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    console.error("MARK ATTENDANCE ERROR:", error);
 
-// ✅ Get attendance for a course
-exports.getCourseAttendance = async (req, res) => {
-  try {
-    const attendance = await Attendance.find({
-      course: req.params.courseId
-    }).populate("records.student", "fullname email");
-
-    res.json(attendance);
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getStudentAttendance = async (req, res) => {
-  try {
-    const attendance = await Attendance.find({
-      student: req.user.id
-    }).populate("course", "title");
-
-    res.json(attendance);
-
-  } catch (error) {
     res.status(500).json({
       message: error.message
     });
@@ -49,58 +23,82 @@ exports.getStudentAttendance = async (req, res) => {
 };
 
 
+// Get attendance records
+exports.getAttendance = async (req, res) => {
+  try {
+    const attendance = await Attendance.find()
+      .populate("records.student", "fullname email")
+      .sort({ createdAt: -1 });
+
+    res.json(attendance);
+
+  } catch (error) {
+    console.error("GET ATTENDANCE ERROR:", error);
+
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
+
+// Get student's attendance
 exports.getMyAttendance = async (req, res) => {
   try {
-
     const attendance = await Attendance.find({
-      "records.studentId": req.user.id
-    }).populate("course", "title");
+      "records.student": req.user.id
+    })
+      .populate("records.student", "fullname email")
+      .sort({ date: -1 });
 
-    // filter only this student's record
     const formatted = attendance.map(item => {
-
       const studentRecord = item.records.find(
-        r => r.studentId.toString() === req.user.id
+        record =>
+          record.student &&
+          record.student._id.toString() === req.user.id.toString()
       );
 
       return {
         _id: item._id,
-        course: item.course,
         date: item.date,
-        status: studentRecord.status
+        status: studentRecord ? studentRecord.status : "unknown"
       };
     });
 
     res.json(formatted);
 
   } catch (error) {
+    console.error("GET MY ATTENDANCE ERROR:", error);
 
     res.status(500).json({
       message: error.message
     });
-
   }
 };
 
-// ✅ Get attendance history
-exports.getAttendanceHistory = async (req, res) => {
 
+// Get attendance history for instructor
+exports.getAttendanceHistory = async (req, res) => {
     try {
+        console.log("===== ATTENDANCE HISTORY =====");
+        console.log("Instructor ID:", req.user.id);
 
         const history = await Attendance.find({
             instructor: req.user.id
         })
-        .populate("records.student", "fullname")
-        .sort({ createdAt: -1 });
+            .populate("records.student", "fullname email")
+            .sort({ date: -1 });
+
+        console.log("Attendance records found:", history.length);
+        console.log("History:", JSON.stringify(history, null, 2));
 
         res.json(history);
 
     } catch (error) {
+        console.error("GET ATTENDANCE HISTORY ERROR:", error);
 
         res.status(500).json({
             message: error.message
         });
-
     }
-
 };
