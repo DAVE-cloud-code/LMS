@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assignments - MyLMS</title>
+<title>Assignments - Pathe Initiative</title>
 <link rel="stylesheet" href="css/dashboard.css">
 <style>
 :root{--primary:#22c55e;--primary-dark:#16a34a;--white:#fff;}
@@ -20,19 +20,245 @@
 .status.graded{background:#dcfce7;color:#166534;}
 .grade{font-weight:700;color:#166534;margin-top:10px;}
 .empty-state{background:white;padding:40px;border-radius:15px;text-align:center;box-shadow:0 5px 20px rgba(0,0,0,.08);}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+/* Tablets */
+@media (max-width: 900px) {
+
+    .assignment-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .assignment-card {
+        padding: 20px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+}
+
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    /* Page layout */
+    .dashboard {
+        display: block;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 260px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* Main content */
+    .main-content {
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    /* Navbar */
+    .top-navbar {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 15px;
+    }
+
+    .top-navbar .left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .top-navbar h3 {
+        font-size: 17px;
+        margin: 0;
+    }
+
+    .hamburger {
+        display: block;
+        font-size: 22px;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .right {
+        gap: 8px;
+    }
+
+    .notification-btn {
+        font-size: 17px;
+    }
+
+    .profile-btn {
+        font-size: 13px;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Page heading */
+    .main-content h1 {
+        font-size: 25px;
+        line-height: 1.3;
+        margin-top: 20px;
+    }
+
+    .main-content > p {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #666;
+    }
+
+    /* Assignment grid */
+    .assignment-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    /* Assignment cards */
+    .assignment-card {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .assignment-card h3 {
+        font-size: 18px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    .assignment-card p {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .due-date {
+        font-size: 13px !important;
+    }
+
+    /* Status */
+    .status {
+        font-size: 12px;
+        padding: 5px 9px;
+    }
+
+    /* Submit button */
+    .submit-btn {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        padding: 11px 15px;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    /* Grade */
+    .grade {
+        font-size: 14px !important;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 30px 20px;
+    }
+
+    .empty-state h2 {
+        font-size: 20px;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+    }
+}
+
+
+/* Small phones */
+@media (max-width: 480px) {
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .top-navbar {
+        padding: 10px 12px;
+    }
+
+    .top-navbar h3 {
+        font-size: 16px;
+    }
+
+    .main-content h1 {
+        font-size: 22px;
+    }
+
+    .assignment-card {
+        padding: 16px;
+    }
+
+    .assignment-card h3 {
+        font-size: 17px;
+    }
+
+    .assignment-card p {
+        font-size: 13px;
+    }
+
+    .submit-btn {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+}
 </style>
 </head>
 <body>
 <div class="dashboard">
 <aside class="sidebar">
-<h2>MyLMS</h2>
+<h2>Pathe Initiative</h2>
 <a href="dashboard.html">Dashboard</a>
-<a href="courses.html">Courses</a>
 <a href="assignments.html">Assignments</a>
 <a href="student-attendance.html">Attendance</a>
 <a href="#" onclick="logout()">Logout</a>
 </aside>
 <main class="main-content">
+      <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+          <div class="left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h3>Dashboard</h3>
+    </div>
+
+        <div class="right">
+            <button class="notification-btn">🔔</button>
+<a href="profile.html" class="profile-btn" id="username">User</a>        </div>
+    </div>
+
 <h1>Available Assignments</h1>
 <p>Complete and submit your assignments before their due dates.</p>
 <div class="assignment-grid" id="assignmentContainer"></div>
@@ -46,6 +272,13 @@ const container = document.getElementById("assignmentContainer");
 
 if (!token || !user || user.role !== "student") {
     window.location.href = "login.html";
+}
+
+// ✅ Set username in navbar
+document.getElementById("username").textContent = user.fullname;
+
+function toggleSidebar() {
+    document.querySelector(".sidebar").classList.toggle("active");
 }
 
 function escapeHtml(value) {

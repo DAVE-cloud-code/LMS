@@ -37,4 +37,5 @@ router.get(
     authController.getProfile
 );
 
+
 module.exports = router;

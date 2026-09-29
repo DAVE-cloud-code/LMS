@@ -4,34 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Class Video</title>
-    <link rel="stylesheet" href="/Frontend/css/dashboard.css">
-
-        <style>
-            :root {
-    --primary: #22c55e;
-    --primary-dark: #16a34a;
-    --bg-light: #f0fdf4;
-    --white: #ffffff;
-    --text-dark: #1f2937;
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-}
-
-body{
-    background:var(--bg-light);
-}
-
-.dashboard{
-    display:flex;
-    min-height:100vh;
-}
-
-.main-content{
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        
+.main-content1{
     flex:1;
     padding:50px;
     display:flex;
@@ -110,30 +86,23 @@ input[type=file]{
 .upload-btn:hover{
     background:var(--primary-dark);
 }
-
-@media(max-width:768px){
-
-    .dashboard{
-        flex-direction:column;
-    }
-
-    .main-content{
-        padding:20px;
-    }
-
-    .upload-card{
-        padding:25px;
-    }
-
-}
-
     </style>
 </head>
 <body>
     <div class="dashboard">
 
-          <aside class="sidebar">
+         <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
         <h2>Instructor Panel</h2>
+    </header>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+          <aside class="sidebar" id="sidebar">
+        <h2>Instructor Panel</h2>
+          
         <a href="instructor-dashboard.html">Dashboard</a>
                  <a href="students.html"> Add Students</a>
         <a href="attendance.html">Attendance</a>
@@ -142,7 +111,7 @@ input[type=file]{
         <a href="#" onclick="logout()">Logout</a>
     </aside>
 
-<main class="main-content">
+<main class="main-content1">
 
     <div class="upload-card">
 
@@ -208,6 +177,29 @@ const user = JSON.parse(localStorage.getItem("user"));
 if (!token || !user || user.role !== "instructor") {
     window.location.href = "login.html";
 }
+
+/* =========================
+   SIDEBAR
+========================= */
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+
+    sidebar.classList.toggle("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.toggle("active");
+}
+
+
+function closeSidebar() {
+    document.getElementById("sidebar")
+        .classList.remove("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.remove("active");
+}
+
 
 // Form Elements
 const form = document.getElementById("uploadForm");
@@ -282,7 +274,6 @@ form.addEventListener("submit", async (e) => {
     }
 
 });
-
 
 // Logout
 function logout() {

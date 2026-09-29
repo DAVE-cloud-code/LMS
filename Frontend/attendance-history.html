@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+         <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance History</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
@@ -22,6 +24,7 @@ body{
 .main-content{
     flex:1;
     padding:40px;
+    margin-top: 30px;
 }
 
 .main-content h1{
@@ -108,9 +111,17 @@ gap:8px;
 <body>
 
 <div class="dashboard">
+      <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h2>Instructor Panel</h2>
+    </header>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
     <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
         <h2>Instructor Panel</h2>
         <a href="instructor-dashboard.html">Dashboard</a>
         <a href="upload.html">Upload Video</a>
@@ -140,6 +151,29 @@ if (!token || user.role !== "instructor") {
 }
 
 const container = document.getElementById("historyContainer");
+
+/* =========================
+   SIDEBAR
+========================= */
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+
+    sidebar.classList.toggle("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.toggle("active");
+}
+
+
+function closeSidebar() {
+    document.getElementById("sidebar")
+        .classList.remove("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.remove("active");
+}
+
 
 // ✅ Load attendance history
 async function loadHistory() {

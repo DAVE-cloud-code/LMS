@@ -381,7 +381,6 @@ th{
 .top-navbar .right {
     display: flex;
     align-items: center;
-    gap: 20px;
 }
 
 .notification-btn {
@@ -438,6 +437,230 @@ th{
 select {
     padding: 5px;
 }
+
+/* =========================
+   MOBILE HEADER
+========================= */
+
+.mobile-header {
+    display: none;
+    margin-bottom: 50px;
+}
+
+
+/* =========================
+   SIDEBAR HEADER
+========================= */
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close-sidebar {
+    display: none;
+}
+
+
+/* =========================
+   SIDEBAR OVERLAY
+========================= */
+
+.sidebar-overlay {
+    display: none;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+    /* =========================
+       MOBILE HEADER
+    ========================= */
+
+    .mobile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        height: 60px;
+        padding: 0 20px;
+
+background: #ffffff;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        z-index: 1200;
+
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .mobile-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #1f2937;
+    }
+
+
+    /* =========================
+       HAMBURGER
+    ========================= */
+
+    .hamburger {
+        border: none;
+        display: block;
+        background: transparent;
+
+        font-size: 28px;
+        cursor: pointer;
+
+        padding: 5px;
+
+        color: #1f2937;
+
+        position: relative;
+        z-index: 1201;
+    }
+
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 260px;
+        height: 100vh;
+
+        background: var(--primary-dark);
+
+        z-index: 1100;
+
+        transform: translateX(-100%);
+
+        transition: transform 0.3s ease;
+
+        overflow-y: auto;
+
+        pointer-events: none;
+    }
+
+
+    /* Sidebar open */
+
+    .sidebar.active {
+        transform: translateX(0);
+
+        pointer-events: auto;
+    }
+
+
+    /* =========================
+       SIDEBAR LINKS
+    ========================= */
+
+    .sidebar a {
+        position: relative;
+        z-index: 1101;
+
+        display: block;
+
+        cursor: pointer;
+    }
+
+
+    /* =========================
+       CLOSE BUTTON
+    ========================= */
+
+    .close-sidebar {
+        display: block;
+
+        border: none;
+        background: transparent;
+
+        font-size: 30px;
+
+        cursor: pointer;
+
+        line-height: 1;
+
+        position: relative;
+        z-index: 1102;
+    }
+
+
+    /* =========================
+       OVERLAY
+    ========================= */
+
+    .sidebar-overlay {
+        display: block;
+
+        position: fixed;
+
+        inset: 0;
+
+        background: rgba(0, 0, 0, 0.4);
+
+        z-index: 1050;
+
+        opacity: 0;
+
+        visibility: hidden;
+
+        pointer-events: none;
+
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
+    }
+
+
+    .sidebar-overlay.active {
+        opacity: 1;
+
+        visibility: visible;
+
+        pointer-events: auto;
+    }
+
+
+    /* =========================
+       MAIN CONTENT
+    ========================= */
+
+    .main-content {
+        margin-left: 0 !important;
+
+        padding-top: 80px;
+    }
+
+
+        .dashboard{
+        flex-direction:column;
+    }
+
+    .main-content{
+        padding:20px;
+    }
+
+    .upload-card{
+        padding:25px;
+    }
+
+
+}
 /* ===================== */
 /* RESPONSIVE STYLES     */
 /* ===================== */
@@ -452,8 +675,7 @@ select {
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 }
-
-/* SMALL TABLETS AND LARGE PHONES */
+/* 
 @media (max-width: 768px) {
     .dashboard {
         flex-direction: column;
@@ -503,7 +725,7 @@ select {
     .card-grid, .assignment-grid {
         grid-template-columns: 1fr;
     }
-}
+} */
 
 /* SMALL PHONES */
 @media (max-width: 480px) {

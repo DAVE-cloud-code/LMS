@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructor Dashboard</title>
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
@@ -8,37 +10,60 @@
 
 <div class="dashboard">
 
-    <aside class="sidebar">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
         <h2>Instructor Panel</h2>
+    </header>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+            <h2>Instructor Panel</h2>
+
+            <!-- Mobile close button -->
+            <button class="close-sidebar" onclick="closeSidebar()">×</button>
+        </div>
+
         <a href="instructor-dashboard.html">Dashboard</a>
         <a href="upload.html">Upload Video</a>
-                 <a href="students.html"> Add Students</a>
+        <a href="students.html">Add Students</a>
         <a href="attendance.html">Attendance</a>
         <a href="instructor-assignments.html">Assignments</a>
         <a href="attendance-history.html">Attendance History</a>
         <a href="#" onclick="logout()">Logout</a>
+
     </aside>
 
+
     <main class="main-content">
+
         <h1 id="welcomeText">Welcome 👋</h1>
+
         <div class="placement-card">
 
-    <h2>My Placement</h2>
+            <h2>My Placement</h2>
 
-    <div class="placement-info">
-        <p>
-            <strong>State:</strong>
-            <span id="placementState">Loading...</span>
-        </p>
+            <div class="placement-info">
 
-        <p>
-            <strong>Assigned School:</strong>
-            <span id="placementSchool">Loading...</span>
-        </p>
+                <p>
+                    <strong>State:</strong>
+                    <span id="placementState">Loading...</span>
+                </p>
 
-    </div>
+                <p>
+                    <strong>Assigned School:</strong>
+                    <span id="placementSchool">Loading...</span>
+                </p>
 
-</div>
+            </div>
+
+        </div>
+
+    </main>
 
 </div>
 
@@ -46,7 +71,7 @@
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!token || user.role !== "instructor") {
+if (!token || !user || user.role !== "instructor") {
     window.location.href = "login.html";
 }
 
@@ -54,28 +79,68 @@ document.getElementById("welcomeText").textContent =
     `Welcome, ${user.fullname}`;
 
 
+/* =========================
+   SIDEBAR
+========================= */
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+
+    sidebar.classList.toggle("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.toggle("active");
+}
+
+
+function closeSidebar() {
+    document.getElementById("sidebar")
+        .classList.remove("active");
+
+    document.querySelector(".sidebar-overlay")
+        .classList.remove("active");
+}
+
+
+/* =========================
+   PROFILE
+========================= */
+
 async function loadProfile() {
 
-    const res = await fetch(
-        "https://lms-back-7t0r.onrender.com/api/auth/profile",
-        {
-            headers: {
-                Authorization: `Bearer ${token}`
+    try {
+
+        const res = await fetch(
+            "https://lms-back-7t0r.onrender.com/api/auth/profile",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             }
-        }
-    );
+        );
 
-    const profile = await res.json();
+        const profile = await res.json();
 
-    document.getElementById("placementState").textContent =
-        profile.placement || "Not Assigned";
+        document.getElementById("placementState").textContent =
+            profile.placement || "Not Assigned";
 
-    document.getElementById("placementSchool").textContent =
-        profile.school || "Not Assigned";
+        document.getElementById("placementSchool").textContent =
+            profile.school || "Not Assigned";
 
+    } catch (error) {
+
+        console.error("PROFILE ERROR:", error);
+
+        document.getElementById("placementState").textContent =
+            "Unable to load";
+
+        document.getElementById("placementSchool").textContent =
+            "Unable to load";
+    }
 }
 
 loadProfile();
+
 
 function logout() {
     localStorage.clear();
