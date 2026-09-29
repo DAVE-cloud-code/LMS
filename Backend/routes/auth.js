@@ -10,26 +10,64 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 
 router.post("/forgot-password", authController.forgotPassword);
-router.post("/reset-password/:token", authController.resetPassword);
+
+router.post(
+    "/reset-password/:token",
+    authController.resetPassword
+);
+
+
+// =========================
+// ADMIN: CREATE INSTRUCTOR
+// =========================
+
 router.post(
     "/create-instructor",
     auth,
     authorizeRoles("admin"),
     authController.createInstructor
 );
-// Admin gets instructors
+
+
+// =========================
+// ADMIN: GET INSTRUCTORS
+// =========================
+
 router.get(
     "/instructors",
     auth,
     authorizeRoles("admin"),
     authController.getAllInstructors
 );
+
+
+// =========================
+// ADMIN: GET ALL USERS
+// =========================
+
 router.get(
-  "/users",
-  auth,
-  authorizeRoles("admin"),
-  authController.getAllUsers
+    "/users",
+    auth,
+    authorizeRoles("admin"),
+    authController.getAllUsers
 );
+
+
+// =========================
+// ADMIN: DELETE USER
+// =========================
+
+router.delete(
+    "/users/:id",
+    auth,
+    authorizeRoles("admin"),
+    authController.deleteUser
+);
+
+
+// =========================
+// USER: GET PROFILE
+// =========================
 
 router.get(
     "/profile",
